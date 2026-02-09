@@ -1,73 +1,73 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T15:07:57.271Z",
+  "generatedAt": "2026-02-09T16:42:49.210Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 2,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-40",
-        "summary": "Add a persistent, database-like backend data model to store Backend page status snapshots (a \"sheet/table\" of rows) inside the Motoko canister state, where each row includes a unique id, a capturedAt timestamp, and the same count fields currently returned by getBackendStatus (profiles, events, announcements, gallery images, activities, approved users, pending users). Access must be admin-only.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-41",
-        "summary": "Implement backend APIs to manage the stored backend status snapshots so the data can be viewed and managed as a table: (1) create/capture a new snapshot row, (2) list snapshot rows (most recent first), and (3) delete a snapshot row and/or clear all snapshots.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-42",
-        "summary": "Ensure the new backend snapshot storage is upgrade-safe and does not erase any existing deployed state (profiles, events, announcements, approvals, authorization data). Add conditional upgrade/migration handling only if required by the current persistence approach.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-43",
-        "summary": "Update the existing admin-only Backend page (frontend/src/pages/BackendPage.tsx) to display the stored backend status snapshots in a clear table (sheet-like) view, including captured timestamp and all count columns, and provide controls to: (1) capture a new snapshot row, (2) refresh the table, and (3) delete a row and/or clear all rows. Use English user-facing text.",
+        "id": "REQ-51",
+        "summary": "Update the Admin Dashboard content editors to support uploading photos from the user’s device (not only pasting URLs):\n- In `frontend/src/components/admin/GalleryEditorDialog.tsx`, add an image file picker (accept PNG/JPG/WebP) that converts the selected file to a Data URL and stores it into the existing `imageUrl` field.\n- In `frontend/src/components/admin/ActivityEditorDialog.tsx`, add one or more image file pickers that convert selected files to Data URLs and append them into the existing `photos: string[]` list.\nUse English user-facing text for labels, helper text, and errors.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/BackendPage.tsx"
+          "frontend/src/components/admin/GalleryEditorDialog.tsx",
+          "frontend/src/components/admin/ActivityEditorDialog.tsx",
+          "frontend/src/utils/imageDataUrl.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/BackendPage.tsx"
+          "frontend/src/components/admin/GalleryEditorDialog.tsx",
+          "frontend/src/components/admin/ActivityEditorDialog.tsx",
+          "frontend/src/utils/imageDataUrl.ts"
         ]
       },
       {
-        "id": "REQ-44",
-        "summary": "Add React Query hooks (or extend existing hooks) to fetch and mutate backend status snapshots, following existing patterns in frontend/src/hooks (actor availability checks, no unauthenticated querying, and proper cache invalidation after mutations).",
+        "id": "REQ-52",
+        "summary": "Add basic client-side validation and guardrails for admin photo uploads:\n- Enforce allowed MIME types (PNG/JPG/WebP).\n- Enforce a clear maximum file size per image (with an English validation message when exceeded).\n- Show an English warning/helper note in the dialogs that uploaded images are stored inside the app data (as embedded images) and that large images may be slow.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useBackendSnapshots.ts"
+          "frontend/src/utils/imageDataUrl.ts",
+          "frontend/src/components/admin/GalleryEditorDialog.tsx",
+          "frontend/src/components/admin/ActivityEditorDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useBackendSnapshots.ts"
+          "frontend/src/utils/imageDataUrl.ts",
+          "frontend/src/components/admin/GalleryEditorDialog.tsx",
+          "frontend/src/components/admin/ActivityEditorDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-53",
+        "summary": "Improve the Gallery and Activities viewing experience (additional feature enhancement requested by the user) by adding an in-page photo viewer:\n- In `frontend/src/pages/GalleryPage.tsx`, allow clicking a gallery image card to open a modal/lightbox that shows the image larger, with title/description, and Next/Previous navigation across the current list.\n- In `frontend/src/pages/ActivitiesPage.tsx`, allow clicking an activity photo thumbnail to open it in a modal/lightbox (and optionally navigate among that activity’s photos).\nUse English user-facing text for actions like Close/Next/Previous.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/PhotoLightboxDialog.tsx",
+          "frontend/src/pages/GalleryPage.tsx",
+          "frontend/src/pages/ActivitiesPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/PhotoLightboxDialog.tsx",
+          "frontend/src/pages/GalleryPage.tsx",
+          "frontend/src/pages/ActivitiesPage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useBackendSnapshots.ts",
-    "frontend/src/pages/BackendPage.tsx",
+    "frontend/src/components/PhotoLightboxDialog.tsx",
+    "frontend/src/components/admin/ActivityEditorDialog.tsx",
+    "frontend/src/components/admin/GalleryEditorDialog.tsx",
+    "frontend/src/pages/ActivitiesPage.tsx",
+    "frontend/src/pages/GalleryPage.tsx",
+    "frontend/src/utils/imageDataUrl.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

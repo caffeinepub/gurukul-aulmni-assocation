@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
+  "projectStateVersion": 25,
   "summary": "Build an app for an alumni association named \"Gurukul Aulmni Assocation\", including role-based administration, content/member management, and approved-member-only access.",
   "architectural_notes": [
     "Add role-based access control (RBAC) beyond a single admin list; define roles/permissions for content (posts/announcements) and member management actions.",
@@ -11,7 +11,8 @@
     "Provide admin-managed content models + CRUD UI for Gallery items and Acts & Activities entries (not just static pages).",
     "Add an admin-only \"Backend\" diagnostics page; define what backend information is safe to expose and ensure it is protected by RBAC/super-admin access.",
     "Support a bootstrap/super-admin mechanism (e.g., hardcoded or config-based allowlist) to always grant admin privileges to a specific email identity (chresthaxakxham@gmail.com), in addition to existing admin management.",
-    "Backend page should read from persistent canister state (database-like tables) for any backend info that must be stored long-term, not only computed at request time."
+    "Backend page should read from persistent canister state (database-like tables) for any backend info that must be stored long-term, not only computed at request time.",
+    "Backend/data page table UI should support CRUD operations (add/edit/delete) plus client-side or server-side search/filter, sorting, and pagination for large datasets; must remain responsive and admin-only."
   ],
   "known_issues": [
     "Admin Dashboard page is stuck on loading / not rendering, while other pages load correctly.",
@@ -283,6 +284,70 @@
         "REQ-44"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-redesign-the-current-backend-data-page-frontend-src-pages-backendpage-tsx-to-function-like-a-database-spreadsheet-table-show-all-snapshot-records-in-a-structured-table-where-columns-map-to-snapshot-fields-and-rows-map-to-individual-snapshot-records-using-a-clean-professional-responsive-layout",
+      "title": "Redesign the current Backend/data page (frontend/src/pages/BackendPage.tsx) to function like a database/spreadsheet table: show all snapshot records in a structured table where columns map to snapshot fields and rows map to individual snapshot records, using a clean, professional, responsive layout.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-database-table-interactions-to-the-backend-data-page-column-sorting-search-and-filtering-controls-that-operate-on-the-displayed-records-and-update-the-visible-rows-accordingly",
+      "title": "Add database-table interactions to the Backend/data page: column sorting, search, and filtering controls that operate on the displayed records and update the visible rows accordingly.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-pagination-controls-to-the-backend-data-table-so-large-datasets-remain-usable-including-page-navigation-and-a-page-size-selector",
+      "title": "Add pagination controls to the Backend/data table so large datasets remain usable, including page navigation and a page-size selector.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-ui-flows-on-the-backend-data-page-to-add-new-records-edit-existing-records-and-delete-records-with-clear-actions-per-row-and-confirmations-where-destructive",
+      "title": "Add UI flows on the Backend/data page to add new records, edit existing records, and delete records, with clear actions per row and confirmations where destructive.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-extend-react-query-hooks-to-support-creating-manual-snapshot-records-and-updating-existing-snapshot-records-following-the-existing-snapshot-hook-patterns-actor-availability-checks-no-unauthenticated-querying-and-proper-cache-invalidation",
+      "title": "Add/extend React Query hooks to support creating manual snapshot records and updating existing snapshot records, following the existing snapshot hook patterns (actor availability checks, no unauthenticated querying, and proper cache invalidation).",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-dashboard-content-editors-to-support-uploading-photos-from-the-user-s-device-not-only-pasting-urls-in-frontend-src-components-admin-galleryeditordialog-tsx-add-an-image-file-picker-accept-png-jpg-webp-that-converts-the-selected-file-to-a-data-url-and-stores-it-into-the-existing-imageurl-field-in-frontend-src-components-admin-activityeditordialog-tsx-add-one-or-more-image-file-pickers-that-convert-selected-files-to-data-urls-and-append-them-into-the-existing-photos-string-list-use-english-user-facing-text-for-labels-helper-text-and-errors",
+      "title": "Update the Admin Dashboard content editors to support uploading photos from the user’s device (not only pasting URLs):\n- In `frontend/src/components/admin/GalleryEditorDialog.tsx`, add an image file picker (accept PNG/JPG/WebP) that converts the selected file to a Data URL and stores it into the existing `imageUrl` field.\n- In `frontend/src/components/admin/ActivityEditorDialog.tsx`, add one or more image file pickers that convert selected files to Data URLs and append them into the existing `photos: string[]` list.\nUse English user-facing text for labels, helper text, and errors.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-basic-client-side-validation-and-guardrails-for-admin-photo-uploads-enforce-allowed-mime-types-png-jpg-webp-enforce-a-clear-maximum-file-size-per-image-with-an-english-validation-message-when-exceeded-show-an-english-warning-helper-note-in-the-dialogs-that-uploaded-images-are-stored-inside-the-app-data-as-embedded-images-and-that-large-images-may-be-slow",
+      "title": "Add basic client-side validation and guardrails for admin photo uploads:\n- Enforce allowed MIME types (PNG/JPG/WebP).\n- Enforce a clear maximum file size per image (with an English validation message when exceeded).\n- Show an English warning/helper note in the dialogs that uploaded images are stored inside the app data (as embedded images) and that large images may be slow.",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-the-gallery-and-activities-viewing-experience-additional-feature-enhancement-requested-by-the-user-by-adding-an-in-page-photo-viewer-in-frontend-src-pages-gallerypage-tsx-allow-clicking-a-gallery-image-card-to-open-a-modal-lightbox-that-shows-the-image-larger-with-title-description-and-next-previous-navigation-across-the-current-list-in-frontend-src-pages-activitiespage-tsx-allow-clicking-an-activity-photo-thumbnail-to-open-it-in-a-modal-lightbox-and-optionally-navigate-among-that-activity-s-photos-use-english-user-facing-text-for-actions-like-close-next-previous",
+      "title": "Improve the Gallery and Activities viewing experience (additional feature enhancement requested by the user) by adding an in-page photo viewer:\n- In `frontend/src/pages/GalleryPage.tsx`, allow clicking a gallery image card to open a modal/lightbox that shows the image larger, with title/description, and Next/Previous navigation across the current list.\n- In `frontend/src/pages/ActivitiesPage.tsx`, allow clicking an activity photo thumbnail to open it in a modal/lightbox (and optionally navigate among that activity’s photos).\nUse English user-facing text for actions like Close/Next/Previous.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -456,6 +521,26 @@
       "reqIds": [
         "REQ-42"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Redesign the Backend/data page UI into a full database-like table with structured rows/columns plus CRUD (add/edit/delete), search/filter, sortable columns, and pagination; responsive, spreadsheet-style layout.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Extend the backend snapshots data API to support editing existing snapshot records (update by id) and creating new snapshot records from user-provided field values, with admin-only access controls consistent with existing snapshot APIs.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-44",
+      "summary": "Add admin-side photo upload for Gallery and Acts & Activities: allow admins to upload images (select file, upload, preview), attach them to Gallery/Activities items, and manage/remove uploaded photos from the Admin Dashboard.",
+      "reqIds": [],
       "status": "pending"
     }
   ],

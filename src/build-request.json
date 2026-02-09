@@ -1,124 +1,82 @@
 {
   "kind": "build_request",
-  "title": "Persist Backend page status data in a database-like table with history",
+  "title": "Add admin photo upload for Gallery and Activities + improve photo viewing UX",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-40",
-      "text": "Add a persistent, database-like backend data model to store Backend page status snapshots (a \"sheet/table\" of rows) inside the Motoko canister state, where each row includes a unique id, a capturedAt timestamp, and the same count fields currently returned by getBackendStatus (profiles, events, announcements, gallery images, activities, approved users, pending users). Access must be admin-only.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "recent-messages"
-        ],
-        "quotes": [
-          "You create the backend page, but I need the data to be stored in a database, like in a sheet or table."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend compiles and deploys with a new persisted snapshot table/collection stored in-canister (no external database).",
-        "Each snapshot row contains: id, capturedAt timestamp, totalAlumniProfiles, totalEvents, totalAnnouncements, totalGalleryImages, totalActivities, totalApprovedUsers, totalPendingUsers.",
-        "All snapshot read/write APIs are protected by the existing adminGuard (admins only)."
-      ]
-    },
-    {
-      "id": "REQ-41",
-      "text": "Implement backend APIs to manage the stored backend status snapshots so the data can be viewed and managed as a table: (1) create/capture a new snapshot row, (2) list snapshot rows (most recent first), and (3) delete a snapshot row and/or clear all snapshots.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "recent-messages"
-        ],
-        "quotes": [
-          "i need in database things. like sheet or table"
-        ]
-      },
-      "acceptanceCriteria": [
-        "There is an admin-only update call that captures the current backend status and appends it as a new stored row.",
-        "There is an admin-only query call that returns the list of stored snapshot rows, ordered newest-to-oldest.",
-        "There is an admin-only method to delete a single snapshot (by id) and/or clear all snapshots.",
-        "Error messages for missing ids are explicit (e.g., \"Snapshot does not exist\")."
-      ]
-    },
-    {
-      "id": "REQ-42",
-      "text": "Ensure the new backend snapshot storage is upgrade-safe and does not erase any existing deployed state (profiles, events, announcements, approvals, authorization data). Add conditional upgrade/migration handling only if required by the current persistence approach.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "recent-messages"
-        ],
-        "quotes": [
-          "I need the data to be stored in a database, like in a sheet or table."
-        ]
-      },
-      "acceptanceCriteria": [
-        "After an upgrade, existing application data remains available (profiles/events/announcements/gallery/activities/approvals/admin access).",
-        "After an upgrade, previously captured backend status snapshots (if any existed) remain available.",
-        "If a migration is introduced, it is conditional and preserves existing state."
-      ]
-    },
-    {
-      "id": "REQ-43",
-      "text": "Update the existing admin-only Backend page (frontend/src/pages/BackendPage.tsx) to display the stored backend status snapshots in a clear table (sheet-like) view, including captured timestamp and all count columns, and provide controls to: (1) capture a new snapshot row, (2) refresh the table, and (3) delete a row and/or clear all rows. Use English user-facing text.",
+      "id": "REQ-51",
+      "text": "Update the Admin Dashboard content editors to support uploading photos from the user’s device (not only pasting URLs):\n- In `frontend/src/components/admin/GalleryEditorDialog.tsx`, add an image file picker (accept PNG/JPG/WebP) that converts the selected file to a Data URL and stores it into the existing `imageUrl` field.\n- In `frontend/src/components/admin/ActivityEditorDialog.tsx`, add one or more image file pickers that convert selected files to Data URLs and append them into the existing `photos: string[]` list.\nUse English user-facing text for labels, helper text, and errors.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-5"
         ],
         "quotes": [
-          "I need the data to be stored in a database, like in a sheet or table."
+          "add in admin page toupoad photo in gallary page & activites."
         ]
       },
       "acceptanceCriteria": [
-        "Backend page shows a table of persisted snapshot rows (not just the current live counts).",
-        "The page includes a \"Capture Snapshot\" action that adds a new row and updates the table.",
-        "The page includes row deletion and a \"Clear All\" action (with a confirmation step) and updates the table after changes.",
-        "All error/empty/loading states are in English; when there are no rows, an explicit empty state is shown (e.g., \"No snapshots yet\")."
+        "Gallery editor supports selecting an image file from disk and shows a preview before saving.",
+        "Saving a gallery item after selecting a file persists the image by storing a Data URL in `imageUrl` (no backend schema/API changes required).",
+        "Activity editor supports selecting one or multiple image files from disk and adds them to the photos list as Data URLs.",
+        "Activity editor still supports adding photos by URL (existing behavior preserved).",
+        "All new/updated labels, helper text, and validation messages are in English.",
+        "Admin-only access behavior remains unchanged (only users with the existing content permissions can create/edit)."
       ]
     },
     {
-      "id": "REQ-44",
-      "text": "Add React Query hooks (or extend existing hooks) to fetch and mutate backend status snapshots, following existing patterns in frontend/src/hooks (actor availability checks, no unauthenticated querying, and proper cache invalidation after mutations).",
+      "id": "REQ-52",
+      "text": "Add basic client-side validation and guardrails for admin photo uploads:\n- Enforce allowed MIME types (PNG/JPG/WebP).\n- Enforce a clear maximum file size per image (with an English validation message when exceeded).\n- Show an English warning/helper note in the dialogs that uploaded images are stored inside the app data (as embedded images) and that large images may be slow.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-5"
         ],
         "quotes": [
-          "I need the data to be stored in a database, like in a sheet or table."
+          "add in admin page toupoad photo in gallary page & activites."
         ]
       },
       "acceptanceCriteria": [
-        "Snapshot queries do not run unless an actor is available and the user is authenticated (consistent with useBackendSummary enabled logic).",
-        "After capturing/deleting/clearing snapshots, the snapshot list query is invalidated/refetched so the table updates without a full page reload.",
-        "Failure states surface a readable error message and allow retry (consistent with existing BackendPage error UI patterns)."
+        "Selecting an unsupported file type shows an English validation error and does not add/set the photo.",
+        "Selecting a file larger than the configured limit shows an English validation error and does not add/set the photo.",
+        "Gallery dialog and Activity dialog show a short English helper note about embedded images and performance/size considerations.",
+        "Existing create/update flows still work when using URL inputs only (no regression)."
+      ]
+    },
+    {
+      "id": "REQ-53",
+      "text": "Improve the Gallery and Activities viewing experience (additional feature enhancement requested by the user) by adding an in-page photo viewer:\n- In `frontend/src/pages/GalleryPage.tsx`, allow clicking a gallery image card to open a modal/lightbox that shows the image larger, with title/description, and Next/Previous navigation across the current list.\n- In `frontend/src/pages/ActivitiesPage.tsx`, allow clicking an activity photo thumbnail to open it in a modal/lightbox (and optionally navigate among that activity’s photos).\nUse English user-facing text for actions like Close/Next/Previous.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "add more feature that you think it should."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Clicking a gallery image opens a modal/lightbox with a larger preview and English-labeled controls (at minimum: Close; plus Next/Previous for gallery).",
+        "Clicking an activity photo opens a modal/lightbox with a larger preview and an English-labeled Close control.",
+        "Lightbox is keyboard-accessible at a basic level (Escape closes).",
+        "No changes to the approval/auth gating: `/gallery` and `/activities` remain behind the existing `RequireApproved` pattern."
       ]
     }
   ],
   "constraints": [
-    "Do not add or depend on any external database (e.g., Google Sheets, PostgreSQL, MongoDB); persistence must be inside the Motoko canister state.",
-    "Keep all Motoko logic in the single backend actor (backend/main.mo).",
-    "Do not edit files under frontend/src/components/ui or other paths listed in frontend.immutablePaths; compose existing UI components instead.",
-    "All user-facing text must be in English."
+    "Do not edit files under `frontend/src/components/ui` (compose existing UI components instead).",
+    "Do not modify immutable frontend paths: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`.",
+    "Keep all user-facing text in English.",
+    "Backend must remain single-actor (no new backend canisters/services)."
   ],
   "nonGoals": [
-    "Adding real-time updates/streaming logs on the Backend page.",
-    "Exporting snapshots to CSV/Excel or integrating with Google Sheets.",
-    "Introducing additional backend diagnostics beyond storing and displaying the requested table of status snapshots."
+    "Implementing a separate asset canister or external image hosting/CDN.",
+    "Adding third-party storage integrations (S3, Cloudinary, etc.).",
+    "Changing backend data models for gallery/activities (store uploads using existing `imageUrl`/`photos` string fields as Data URLs for this iteration).",
+    "Adding real-time collaboration or live updates beyond current React Query invalidation patterns."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

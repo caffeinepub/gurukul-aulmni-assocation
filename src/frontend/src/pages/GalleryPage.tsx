@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import RequireApproved from '@/components/RequireApproved';
 import BackendUnavailableCard from '@/components/BackendUnavailableCard';
+import PhotoLightboxDialog from '@/components/PhotoLightboxDialog';
 import { useGetGalleryImages } from '@/hooks/useQueries';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Image } from 'lucide-react';
@@ -14,6 +16,8 @@ export default function GalleryPage() {
 
 function GalleryContent() {
   const { data: galleryImages, isLoading, isError, refetch } = useGetGalleryImages();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   if (isLoading) {
     return (
@@ -29,6 +33,17 @@ function GalleryContent() {
   if (isError) {
     return <BackendUnavailableCard onRetry={refetch} title="Unable to Load Gallery" description="There was an error loading the gallery. Please try again." />;
   }
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const lightboxPhotos = galleryImages?.map((item) => ({
+    url: item.imageUrl,
+    title: item.title,
+    description: item.description,
+  })) || [];
 
   return (
     <div className="container py-8 md:py-12">
@@ -57,27 +72,40 @@ function GalleryContent() {
           </CardHeader>
         </Card>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {galleryImages.map((item) => (
-            <Card key={item.id.toString()} className="overflow-hidden">
-              <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
-                {item.imageUrl ? (
-                  <img 
-                    src={item.imageUrl} 
-                    alt={item.title}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <Image className="h-12 w-12 text-muted-foreground" />
-                )}
-              </div>
-              <CardHeader className="p-4">
-                <CardTitle className="text-base">{item.title}</CardTitle>
-                <CardDescription className="text-sm">{item.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {galleryImages.map((item, index) => (
+              <Card 
+                key={item.id.toString()} 
+                className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => handleImageClick(index)}
+              >
+                <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
+                  {item.imageUrl ? (
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.title}
+                      className="h-full w-full object-cover transition-transform hover:scale-105"
+                    />
+                  ) : (
+                    <Image className="h-12 w-12 text-muted-foreground" />
+                  )}
+                </div>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-base">{item.title}</CardTitle>
+                  <CardDescription className="text-sm line-clamp-2">{item.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+
+          <PhotoLightboxDialog
+            open={lightboxOpen}
+            onOpenChange={setLightboxOpen}
+            photos={lightboxPhotos}
+            initialIndex={selectedImageIndex}
+          />
+        </>
       )}
     </div>
   );

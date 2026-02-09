@@ -12,9 +12,12 @@ import Int64 "mo:core/Int64";
 import Int "mo:core/Int";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import UserApproval "user-approval/approval";
+
+// Enable data migration
 
 actor {
   type AlumniProfile = {
@@ -118,8 +121,19 @@ actor {
     };
   };
 
-  type BackendSnapshot = {
+  public type BackendSnapshot = {
     id : Nat;
+    capturedAt : Int;
+    totalAlumniProfiles : Nat;
+    totalEvents : Nat;
+    totalAnnouncements : Nat;
+    totalGalleryImages : Nat;
+    totalActivities : Nat;
+    totalApprovedUsers : Nat;
+    totalPendingUsers : Nat;
+  };
+
+  public type EditableBackendSnapshot = {
     capturedAt : Int;
     totalAlumniProfiles : Nat;
     totalEvents : Nat;
@@ -558,6 +572,52 @@ actor {
   public shared ({ caller }) func clearAllBackendSnapshots() : async () {
     adminGuard(caller);
     backendSnapshots.clear();
+  };
+
+  // New functionality for snapshot editing/creation (admin only)
+  public shared ({ caller }) func updateBackendSnapshot(snapshotId : Nat, updatedSnapshot : EditableBackendSnapshot) : async Bool {
+    adminGuard(caller);
+    switch (backendSnapshots.get(snapshotId)) {
+      case (null) {
+        false;
+      };
+      case (?existing) {
+        let newSnapshot : BackendSnapshot = {
+          id = snapshotId;
+          capturedAt = updatedSnapshot.capturedAt;
+          totalAlumniProfiles = updatedSnapshot.totalAlumniProfiles;
+          totalEvents = updatedSnapshot.totalEvents;
+          totalAnnouncements = updatedSnapshot.totalAnnouncements;
+          totalGalleryImages = updatedSnapshot.totalGalleryImages;
+          totalActivities = updatedSnapshot.totalActivities;
+          totalApprovedUsers = updatedSnapshot.totalApprovedUsers;
+          totalPendingUsers = updatedSnapshot.totalPendingUsers;
+        };
+        backendSnapshots.add(snapshotId, newSnapshot);
+        true;
+      };
+    };
+  };
+
+  public shared ({ caller }) func createBackendSnapshotFromValues(snapshot : EditableBackendSnapshot) : async Nat {
+    adminGuard(caller);
+    let snapshotId = nextSnapshotId;
+    nextSnapshotId += 1;
+
+    let newSnapshot : BackendSnapshot = {
+      id = snapshotId;
+      capturedAt = snapshot.capturedAt;
+      totalAlumniProfiles = snapshot.totalAlumniProfiles;
+      totalEvents = snapshot.totalEvents;
+      totalAnnouncements = snapshot.totalAnnouncements;
+      totalGalleryImages = snapshot.totalGalleryImages;
+      totalActivities = snapshot.totalActivities;
+      totalApprovedUsers = snapshot.totalApprovedUsers;
+      totalPendingUsers = snapshot.totalPendingUsers;
+    };
+
+    backendSnapshots.add(snapshotId, newSnapshot);
+    snapshotId;
   };
 
   private func countApprovedUsers() : Nat {

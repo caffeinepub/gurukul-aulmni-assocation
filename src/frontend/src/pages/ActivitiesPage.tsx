@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import RequireApproved from '@/components/RequireApproved';
 import BackendUnavailableCard from '@/components/BackendUnavailableCard';
+import PhotoLightboxDialog from '@/components/PhotoLightboxDialog';
 import { useGetActivities } from '@/hooks/useQueries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity, Image } from 'lucide-react';
@@ -14,6 +16,9 @@ export default function ActivitiesPage() {
 
 function ActivitiesContent() {
   const { data: activities, isLoading, isError, refetch } = useGetActivities();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxPhotos, setLightboxPhotos] = useState<Array<{ url: string; title?: string; description?: string }>>([]);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
   if (isLoading) {
     return (
@@ -29,6 +34,17 @@ function ActivitiesContent() {
   if (isError) {
     return <BackendUnavailableCard onRetry={refetch} title="Unable to Load Activities" description="There was an error loading activities. Please try again." />;
   }
+
+  const handlePhotoClick = (activityTitle: string, photos: string[], photoIndex: number) => {
+    setLightboxPhotos(
+      photos.map((url, idx) => ({
+        url,
+        title: `${activityTitle} - Photo ${idx + 1}`,
+      }))
+    );
+    setSelectedPhotoIndex(photoIndex);
+    setLightboxOpen(true);
+  };
 
   return (
     <div className="container py-8 md:py-12">
@@ -57,37 +73,50 @@ function ActivitiesContent() {
           </CardHeader>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {activities.map((activity) => (
-            <Card key={activity.id.toString()}>
-              <CardHeader>
-                <CardTitle>{activity.title}</CardTitle>
-                <CardDescription className="mt-2 whitespace-pre-wrap">
-                  {activity.description}
-                </CardDescription>
-              </CardHeader>
-              {activity.photos && activity.photos.length > 0 && (
-                <CardContent>
-                  <div className="grid gap-2 grid-cols-2 sm:grid-cols-3">
-                    {activity.photos.map((photoUrl, index) => (
-                      <div key={index} className="aspect-square bg-muted rounded-md overflow-hidden flex items-center justify-center">
-                        {photoUrl ? (
-                          <img 
-                            src={photoUrl} 
-                            alt={`${activity.title} photo ${index + 1}`}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <Image className="h-8 w-8 text-muted-foreground" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className="grid gap-6 md:grid-cols-2">
+            {activities.map((activity) => (
+              <Card key={activity.id.toString()}>
+                <CardHeader>
+                  <CardTitle>{activity.title}</CardTitle>
+                  <CardDescription className="mt-2 whitespace-pre-wrap">
+                    {activity.description}
+                  </CardDescription>
+                </CardHeader>
+                {activity.photos && activity.photos.length > 0 && (
+                  <CardContent>
+                    <div className="grid gap-2 grid-cols-2 sm:grid-cols-3">
+                      {activity.photos.map((photoUrl, index) => (
+                        <div 
+                          key={index} 
+                          className="aspect-square bg-muted rounded-md overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => handlePhotoClick(activity.title, activity.photos, index)}
+                        >
+                          {photoUrl ? (
+                            <img 
+                              src={photoUrl} 
+                              alt={`${activity.title} photo ${index + 1}`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <Image className="h-8 w-8 text-muted-foreground" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            ))}
+          </div>
+
+          <PhotoLightboxDialog
+            open={lightboxOpen}
+            onOpenChange={setLightboxOpen}
+            photos={lightboxPhotos}
+            initialIndex={selectedPhotoIndex}
+          />
+        </>
       )}
     </div>
   );

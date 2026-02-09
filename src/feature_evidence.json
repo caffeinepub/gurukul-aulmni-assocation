@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-existing-admin-only-backend-page-frontend-src-pages-backendpage-tsx-to-display-the-stored-backend-status-snapshots-in-a-clear-table-sheet-like-view-including-captured-timestamp-and-all-count-columns-and-provide-controls-to-1-capture-a-new-snapshot-row-2-refresh-the-table-and-3-delete-a-row-and-or-clear-all-rows-use-english-user-facing-text",
-      "featureTitle": "Update the existing admin-only Backend page (frontend/src/pages/BackendPage.tsx) to display the stored backend status snapshots in a clear table (sheet-like) view, including captured timestamp and all count columns, and provide controls to: (1) capture a new snapshot row, (2) refresh the table, and (3) delete a row and/or clear all rows. Use English user-facing text.",
+      "featureId": "feature-update-the-admin-dashboard-content-editors-to-support-uploading-photos-from-the-user-s-device-not-only-pasting-urls-in-frontend-src-components-admin-galleryeditordialog-tsx-add-an-image-file-picker-accept-png-jpg-webp-that-converts-the-selected-file-to-a-data-url-and-stores-it-into-the-existing-imageurl-field-in-frontend-src-components-admin-activityeditordialog-tsx-add-one-or-more-image-file-pickers-that-convert-selected-files-to-data-urls-and-append-them-into-the-existing-photos-string-list-use-english-user-facing-text-for-labels-helper-text-and-errors",
+      "featureTitle": "Update the Admin Dashboard content editors to support uploading photos from the user’s device (not only pasting URLs):\n- In `frontend/src/components/admin/GalleryEditorDialog.tsx`, add an image file picker (accept PNG/JPG/WebP) that converts the selected file to a Data URL and stores it into the existing `imageUrl` field.\n- In `frontend/src/components/admin/ActivityEditorDialog.tsx`, add one or more image file pickers that convert selected files to Data URLs and append them into the existing `photos: string[]` list.\nUse English user-facing text for labels, helper text, and errors.",
       "files": [
-        "frontend/src/pages/BackendPage.tsx"
+        "frontend/src/components/admin/ActivityEditorDialog.tsx",
+        "frontend/src/components/admin/GalleryEditorDialog.tsx",
+        "frontend/src/utils/imageDataUrl.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,15 +19,17 @@
         "user-approval@3.0.0"
       ],
       "testIds": [
-        "REQ-43"
+        "REQ-51"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-react-query-hooks-or-extend-existing-hooks-to-fetch-and-mutate-backend-status-snapshots-following-existing-patterns-in-frontend-src-hooks-actor-availability-checks-no-unauthenticated-querying-and-proper-cache-invalidation-after-mutations",
-      "featureTitle": "Add React Query hooks (or extend existing hooks) to fetch and mutate backend status snapshots, following existing patterns in frontend/src/hooks (actor availability checks, no unauthenticated querying, and proper cache invalidation after mutations).",
+      "featureId": "feature-add-basic-client-side-validation-and-guardrails-for-admin-photo-uploads-enforce-allowed-mime-types-png-jpg-webp-enforce-a-clear-maximum-file-size-per-image-with-an-english-validation-message-when-exceeded-show-an-english-warning-helper-note-in-the-dialogs-that-uploaded-images-are-stored-inside-the-app-data-as-embedded-images-and-that-large-images-may-be-slow",
+      "featureTitle": "Add basic client-side validation and guardrails for admin photo uploads:\n- Enforce allowed MIME types (PNG/JPG/WebP).\n- Enforce a clear maximum file size per image (with an English validation message when exceeded).\n- Show an English warning/helper note in the dialogs that uploaded images are stored inside the app data (as embedded images) and that large images may be slow.",
       "files": [
-        "frontend/src/hooks/useBackendSnapshots.ts"
+        "frontend/src/components/admin/ActivityEditorDialog.tsx",
+        "frontend/src/components/admin/GalleryEditorDialog.tsx",
+        "frontend/src/utils/imageDataUrl.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -37,7 +41,29 @@
         "user-approval@3.0.0"
       ],
       "testIds": [
-        "REQ-44"
+        "REQ-52"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-improve-the-gallery-and-activities-viewing-experience-additional-feature-enhancement-requested-by-the-user-by-adding-an-in-page-photo-viewer-in-frontend-src-pages-gallerypage-tsx-allow-clicking-a-gallery-image-card-to-open-a-modal-lightbox-that-shows-the-image-larger-with-title-description-and-next-previous-navigation-across-the-current-list-in-frontend-src-pages-activitiespage-tsx-allow-clicking-an-activity-photo-thumbnail-to-open-it-in-a-modal-lightbox-and-optionally-navigate-among-that-activity-s-photos-use-english-user-facing-text-for-actions-like-close-next-previous",
+      "featureTitle": "Improve the Gallery and Activities viewing experience (additional feature enhancement requested by the user) by adding an in-page photo viewer:\n- In `frontend/src/pages/GalleryPage.tsx`, allow clicking a gallery image card to open a modal/lightbox that shows the image larger, with title/description, and Next/Previous navigation across the current list.\n- In `frontend/src/pages/ActivitiesPage.tsx`, allow clicking an activity photo thumbnail to open it in a modal/lightbox (and optionally navigate among that activity’s photos).\nUse English user-facing text for actions like Close/Next/Previous.",
+      "files": [
+        "frontend/src/components/PhotoLightboxDialog.tsx",
+        "frontend/src/pages/ActivitiesPage.tsx",
+        "frontend/src/pages/GalleryPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "user-approval@3.0.0"
+      ],
+      "testIds": [
+        "REQ-53"
       ],
       "confidence": "high"
     }

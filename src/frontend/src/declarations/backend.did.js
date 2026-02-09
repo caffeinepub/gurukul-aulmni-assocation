@@ -22,6 +22,16 @@ export const EditableAnnouncement = IDL.Record({
   'title' : IDL.Text,
   'content' : IDL.Text,
 });
+export const EditableBackendSnapshot = IDL.Record({
+  'totalActivities' : IDL.Nat,
+  'totalAnnouncements' : IDL.Nat,
+  'totalGalleryImages' : IDL.Nat,
+  'totalEvents' : IDL.Nat,
+  'totalPendingUsers' : IDL.Nat,
+  'totalAlumniProfiles' : IDL.Nat,
+  'capturedAt' : IDL.Int,
+  'totalApprovedUsers' : IDL.Nat,
+});
 export const EditableEvent = IDL.Record({
   'title' : IDL.Text,
   'description' : IDL.Text,
@@ -106,6 +116,11 @@ export const idlService = IDL.Service({
   'createActivity' : IDL.Func([EditableActivity], [], []),
   'createAnnouncement' : IDL.Func([EditableAnnouncement], [], []),
   'createBackendSnapshot' : IDL.Func([], [IDL.Nat], []),
+  'createBackendSnapshotFromValues' : IDL.Func(
+      [EditableBackendSnapshot],
+      [IDL.Nat],
+      [],
+    ),
   'createEvent' : IDL.Func([EditableEvent], [], []),
   'createGalleryImage' : IDL.Func([EditableGalleryImage], [], []),
   'deleteActivity' : IDL.Func([IDL.Nat64], [], []),
@@ -165,6 +180,11 @@ export const idlService = IDL.Service({
     ),
   'setApproval' : IDL.Func([IDL.Principal, ApprovalStatus], [], []),
   'updateActivity' : IDL.Func([IDL.Nat64, EditableActivity], [], []),
+  'updateBackendSnapshot' : IDL.Func(
+      [IDL.Nat, EditableBackendSnapshot],
+      [IDL.Bool],
+      [],
+    ),
   'updateEvent' : IDL.Func([IDL.Nat64, EditableEvent], [], []),
   'updateGalleryImage' : IDL.Func([IDL.Nat64, EditableGalleryImage], [], []),
 });
@@ -185,6 +205,16 @@ export const idlFactory = ({ IDL }) => {
   const EditableAnnouncement = IDL.Record({
     'title' : IDL.Text,
     'content' : IDL.Text,
+  });
+  const EditableBackendSnapshot = IDL.Record({
+    'totalActivities' : IDL.Nat,
+    'totalAnnouncements' : IDL.Nat,
+    'totalGalleryImages' : IDL.Nat,
+    'totalEvents' : IDL.Nat,
+    'totalPendingUsers' : IDL.Nat,
+    'totalAlumniProfiles' : IDL.Nat,
+    'capturedAt' : IDL.Int,
+    'totalApprovedUsers' : IDL.Nat,
   });
   const EditableEvent = IDL.Record({
     'title' : IDL.Text,
@@ -270,6 +300,11 @@ export const idlFactory = ({ IDL }) => {
     'createActivity' : IDL.Func([EditableActivity], [], []),
     'createAnnouncement' : IDL.Func([EditableAnnouncement], [], []),
     'createBackendSnapshot' : IDL.Func([], [IDL.Nat], []),
+    'createBackendSnapshotFromValues' : IDL.Func(
+        [EditableBackendSnapshot],
+        [IDL.Nat],
+        [],
+      ),
     'createEvent' : IDL.Func([EditableEvent], [], []),
     'createGalleryImage' : IDL.Func([EditableGalleryImage], [], []),
     'deleteActivity' : IDL.Func([IDL.Nat64], [], []),
@@ -333,6 +368,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'setApproval' : IDL.Func([IDL.Principal, ApprovalStatus], [], []),
     'updateActivity' : IDL.Func([IDL.Nat64, EditableActivity], [], []),
+    'updateBackendSnapshot' : IDL.Func(
+        [IDL.Nat, EditableBackendSnapshot],
+        [IDL.Bool],
+        [],
+      ),
     'updateEvent' : IDL.Func([IDL.Nat64, EditableEvent], [], []),
     'updateGalleryImage' : IDL.Func([IDL.Nat64, EditableGalleryImage], [], []),
   });

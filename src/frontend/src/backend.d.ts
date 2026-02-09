@@ -48,6 +48,16 @@ export interface Event {
     location: string;
     timestampNanos: bigint;
 }
+export interface EditableBackendSnapshot {
+    totalActivities: bigint;
+    totalAnnouncements: bigint;
+    totalGalleryImages: bigint;
+    totalEvents: bigint;
+    totalPendingUsers: bigint;
+    totalAlumniProfiles: bigint;
+    capturedAt: bigint;
+    totalApprovedUsers: bigint;
+}
 export interface UserApprovalInfo {
     status: ApprovalStatus;
     principal: Principal;
@@ -103,6 +113,7 @@ export interface backendInterface {
     createActivity(activity: EditableActivity): Promise<void>;
     createAnnouncement(announcement: EditableAnnouncement): Promise<void>;
     createBackendSnapshot(): Promise<bigint>;
+    createBackendSnapshotFromValues(snapshot: EditableBackendSnapshot): Promise<bigint>;
     createEvent(event: EditableEvent): Promise<void>;
     createGalleryImage(image: EditableGalleryImage): Promise<void>;
     deleteActivity(id: bigint): Promise<void>;
@@ -134,6 +145,7 @@ export interface backendInterface {
     searchAlumniProfiles(filterYear: number | null, filterDepartment: string | null): Promise<Array<AlumniProfile>>;
     setApproval(user: Principal, status: ApprovalStatus): Promise<void>;
     updateActivity(id: bigint, updatedActivity: EditableActivity): Promise<void>;
+    updateBackendSnapshot(snapshotId: bigint, updatedSnapshot: EditableBackendSnapshot): Promise<boolean>;
     updateEvent(id: bigint, updatedEvent: EditableEvent): Promise<void>;
     updateGalleryImage(id: bigint, updatedImage: EditableGalleryImage): Promise<void>;
 }

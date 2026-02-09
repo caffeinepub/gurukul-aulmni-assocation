@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCreateActivity, useUpdateActivity, useDeleteActivity } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,8 +25,9 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { X } from 'lucide-react';
+import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import type { Activity } from '@/backend';
+import { convertImageToDataUrl, MAX_FILE_SIZE_BYTES } from '@/utils/imageDataUrl';
 
 interface ActivityEditorDialogProps {
   mode: 'create' | 'edit' | 'delete';
@@ -42,6 +43,7 @@ export default function ActivityEditorDialog({ mode, activity, open, onOpenChang
   const [photos, setPhotos] = useState<string[]>([]);
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createMutation = useCreateActivity();
   const updateMutation = useUpdateActivity();
@@ -75,10 +77,44 @@ export default function ActivityEditorDialog({ mode, activity, open, onOpenChang
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddPhoto = () => {
+  const handleAddPhotoUrl = () => {
     if (newPhotoUrl.trim()) {
       setPhotos([...photos, newPhotoUrl.trim()]);
       setNewPhotoUrl('');
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newPhotos: string[] = [];
+    const errors: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const result = await convertImageToDataUrl(file);
+      
+      if (result.error) {
+        errors.push(`${file.name}: ${result.error}`);
+      } else if (result.dataUrl) {
+        newPhotos.push(result.dataUrl);
+      }
+    }
+
+    if (newPhotos.length > 0) {
+      setPhotos([...photos, ...newPhotos]);
+      toast.success(`${newPhotos.length} image(s) added successfully`);
+    }
+
+    if (errors.length > 0) {
+      toast.error(`Failed to add ${errors.length} image(s)`, {
+        description: errors[0],
+      });
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -155,11 +191,12 @@ export default function ActivityEditorDialog({ mode, activity, open, onOpenChang
   }
 
   const isLoading = createMutation.isPending || updateMutation.isPending;
+  const maxSizeMB = (MAX_FILE_SIZE_BYTES / (1024 * 1024)).toFixed(1);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{mode === 'create' ? 'Add Activity' : 'Edit Activity'}</DialogTitle>
           <DialogDescription>
@@ -192,6 +229,42 @@ export default function ActivityEditorDialog({ mode, activity, open, onOpenChang
           </div>
           <div className="space-y-2">
             <Label>Photos (Optional)</Label>
+            
+            {/* File Upload */}
+            <div className="space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={handleFileSelect}
+                className="hidden"
+                id="activity-file-input"
+                multiple
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Image Files
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                PNG, JPG, or WebP (max {maxSizeMB}MB each, multiple files supported)
+              </p>
+            </div>
+
+            {/* URL Input */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or add by URL</span>
+              </div>
+            </div>
+
             <div className="flex gap-2">
               <Input
                 value={newPhotoUrl}
@@ -200,31 +273,47 @@ export default function ActivityEditorDialog({ mode, activity, open, onOpenChang
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    handleAddPhoto();
+                    handleAddPhotoUrl();
                   }
                 }}
               />
-              <Button type="button" variant="outline" onClick={handleAddPhoto}>
+              <Button type="button" variant="outline" onClick={handleAddPhotoUrl}>
                 Add
               </Button>
             </div>
+
             {photos.length > 0 && (
-              <div className="space-y-2 mt-2">
-                {photos.map((photo, index) => (
-                  <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-md">
-                    <span className="flex-1 text-sm truncate">{photo}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemovePhoto(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+              <div className="space-y-2 mt-3">
+                <p className="text-sm font-medium">{photos.length} photo(s) added:</p>
+                <div className="grid gap-2 grid-cols-2 sm:grid-cols-3">
+                  {photos.map((photo, index) => (
+                    <div key={index} className="relative group aspect-square bg-muted rounded-md overflow-hidden">
+                      <img
+                        src={photo}
+                        alt={`Photo ${index + 1}`}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRemovePhoto(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
+
+            <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+              <strong>Note:</strong> Uploaded images are embedded in app data. Large images may impact performance.
+            </p>
           </div>
         </div>
         <DialogFooter>

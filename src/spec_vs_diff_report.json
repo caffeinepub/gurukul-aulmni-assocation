@@ -1,42 +1,54 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T15:07:57.267Z",
-  "summary": "The diff clearly adds frontend React Query hooks for listing/creating/deleting/clearing backend snapshots and updates the Backend admin page UI to use them. The backend diff shows a new BackendSnapshot type and in-canister snapshot state variables, but the truncated backend change does not provide evidence of the required admin-guarded APIs or upgrade-safe (stable) persistence/migration handling for the snapshot table (and it’s unclear whether snapshots are actually persisted across upgrades).",
+  "generatedAt": "2026-02-09T16:42:49.204Z",
+  "summary": "Diff adds a reusable PhotoLightboxDialog with keyboard controls, plus image upload utilities (type/size validation + Data URL conversion). Admin Activity/Gallery editor dialogs were updated to convert selected files to Data URLs and store them into existing string fields. Gallery/Activities pages were updated to open a lightbox modal when images are clicked (implementation partially truncated in the summary).",
   "missing_requirements": [
     {
-      "id": "REQ-40",
-      "requirement": "Persist backend status snapshots inside Motoko canister state with required fields (id, capturedAt, totals) and protect all snapshot APIs with adminGuard.",
-      "reason": "backend/main.mo shows a BackendSnapshot type and in-memory variables (nextSnapshotId, backendSnapshots Map), but the diff does not show any stable storage mechanism or the admin-only snapshot read/write APIs being protected by adminGuard.",
+      "id": "REQ-51",
+      "requirement": "Gallery editor shows a preview of the selected image file before saving.",
+      "reason": "GalleryEditorDialog now sets `imageUrl` from a selected file, but the diff excerpt does not show any preview UI (e.g., an <img> rendering of the selected Data URL) prior to saving; the relevant JSX is truncated so this cannot be confirmed from the provided evidence.",
       "evidence": [
-        "backend/main.mo"
+        "frontend/src/components/admin/GalleryEditorDialog.tsx (truncated)"
       ]
     },
     {
-      "id": "REQ-41",
-      "requirement": "Provide admin-only backend APIs to create/capture a snapshot, list snapshots (newest first), and delete by id and/or clear all, with explicit missing-id error messaging.",
-      "reason": "Frontend hooks call actor.listBackendSnapshots/createBackendSnapshot/deleteBackendSnapshot/clearAllBackendSnapshots, but the backend diff is truncated before any of these functions are shown; ordering (newest-first), admin-only guarding, and explicit backend-side error behavior are not evidenced.",
+      "id": "REQ-52",
+      "requirement": "Gallery dialog and Activity dialog show a short English helper note warning that uploaded images are stored embedded in app data and large images may be slow.",
+      "reason": "The shared validation utility exists, but the diff excerpts for both dialogs do not show any helper/warning note text in the rendered dialog UI; the JSX sections where such text would appear are not present in the truncated output.",
       "evidence": [
-        "frontend/src/hooks/useBackendSnapshots.ts",
-        "backend/main.mo"
+        "frontend/src/components/admin/GalleryEditorDialog.tsx (truncated)",
+        "frontend/src/components/admin/ActivityEditorDialog.tsx (truncated)"
       ]
     },
     {
-      "id": "REQ-42",
-      "requirement": "Make snapshot storage upgrade-safe and ensure existing deployed state is preserved; add conditional migration only if needed.",
-      "reason": "The diff summary does not show any stable variables for snapshots nor any preupgrade/postupgrade (or equivalent) logic to persist/restore snapshot data across upgrades, and does not show any conditional migration handling.",
+      "id": "REQ-53",
+      "requirement": "Gallery page opens a modal/lightbox with larger preview, title/description, and Next/Previous navigation across the current list.",
+      "reason": "GalleryPage imports `PhotoLightboxDialog` and sets up state and `lightboxPhotos`, but the actual rendering/props wiring of the dialog is cut off at ` <PhotoLight...` in the truncated diff, so the required modal behavior cannot be fully verified from the provided summary.",
       "evidence": [
-        "backend/main.mo"
+        "frontend/src/pages/GalleryPage.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-53",
+      "requirement": "Activities page opens a modal/lightbox on thumbnail click with an English-labeled Close control.",
+      "reason": "ActivitiesPage imports `PhotoLightboxDialog` and defines click handling, but the diff excerpt is truncated before showing the `PhotoLightboxDialog` being rendered; additionally, the Close label in the dialog is currently `sr-only` (not a visible control label), so it’s unclear if this meets the intended 'English-labeled Close control' requirement.",
+      "evidence": [
+        "frontend/src/pages/ActivitiesPage.tsx (truncated)",
+        "frontend/src/components/PhotoLightboxDialog.tsx (truncated)"
       ]
     }
   ],
   "hallucinated_features": [],
   "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/hooks/useBackendSnapshots.ts",
-    "frontend/src/pages/BackendPage.tsx",
+    "frontend/src/components/PhotoLightboxDialog.tsx",
+    "frontend/src/components/admin/ActivityEditorDialog.tsx",
+    "frontend/src/components/admin/GalleryEditorDialog.tsx",
+    "frontend/src/pages/ActivitiesPage.tsx",
+    "frontend/src/pages/GalleryPage.tsx",
+    "frontend/src/utils/imageDataUrl.ts",
     "project_state.json"
   ]
 }

@@ -61,6 +61,16 @@ export interface EditableActivity {
   'photos' : Array<string>,
 }
 export interface EditableAnnouncement { 'title' : string, 'content' : string }
+export interface EditableBackendSnapshot {
+  'totalActivities' : bigint,
+  'totalAnnouncements' : bigint,
+  'totalGalleryImages' : bigint,
+  'totalEvents' : bigint,
+  'totalPendingUsers' : bigint,
+  'totalAlumniProfiles' : bigint,
+  'capturedAt' : bigint,
+  'totalApprovedUsers' : bigint,
+}
 export interface EditableEvent {
   'title' : string,
   'description' : string,
@@ -100,6 +110,10 @@ export interface _SERVICE {
   'createActivity' : ActorMethod<[EditableActivity], undefined>,
   'createAnnouncement' : ActorMethod<[EditableAnnouncement], undefined>,
   'createBackendSnapshot' : ActorMethod<[], bigint>,
+  'createBackendSnapshotFromValues' : ActorMethod<
+    [EditableBackendSnapshot],
+    bigint
+  >,
   'createEvent' : ActorMethod<[EditableEvent], undefined>,
   'createGalleryImage' : ActorMethod<[EditableGalleryImage], undefined>,
   'deleteActivity' : ActorMethod<[bigint], undefined>,
@@ -140,6 +154,10 @@ export interface _SERVICE {
   >,
   'setApproval' : ActorMethod<[Principal, ApprovalStatus], undefined>,
   'updateActivity' : ActorMethod<[bigint, EditableActivity], undefined>,
+  'updateBackendSnapshot' : ActorMethod<
+    [bigint, EditableBackendSnapshot],
+    boolean
+  >,
   'updateEvent' : ActorMethod<[bigint, EditableEvent], undefined>,
   'updateGalleryImage' : ActorMethod<[bigint, EditableGalleryImage], undefined>,
 }
