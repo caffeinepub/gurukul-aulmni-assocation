@@ -7,6 +7,9 @@ import DirectoryPage from './pages/DirectoryPage';
 import EventsPage from './pages/EventsPage';
 import AnnouncementsPage from './pages/AnnouncementsPage';
 import MyProfilePage from './pages/MyProfilePage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import GalleryPage from './pages/GalleryPage';
+import ActivitiesPage from './pages/ActivitiesPage';
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -46,12 +49,33 @@ const myProfileRoute = createRoute({
   component: MyProfilePage,
 });
 
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  component: AdminDashboardPage,
+});
+
+const galleryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/gallery',
+  component: GalleryPage,
+});
+
+const activitiesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/activities',
+  component: ActivitiesPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   directoryRoute,
   eventsRoute,
   announcementsRoute,
   myProfileRoute,
+  adminRoute,
+  galleryRoute,
+  activitiesRoute,
 ]);
 
 const router = createRouter({ routeTree });

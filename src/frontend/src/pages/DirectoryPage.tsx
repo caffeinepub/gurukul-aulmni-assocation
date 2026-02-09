@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSearchAlumniProfiles, useGetGraduationYears, useGetDepartments } from '@/hooks/useQueries';
+import RequireApproved from '@/components/RequireApproved';
 import DirectoryFilters from '@/components/DirectoryFilters';
 import AlumniCard from '@/components/AlumniCard';
 import AlumniProfileDetailDialog from '@/components/AlumniProfileDetailDialog';
@@ -8,6 +9,14 @@ import { Users, Loader2 } from 'lucide-react';
 import type { AlumniProfile } from '@/backend';
 
 export default function DirectoryPage() {
+  return (
+    <RequireApproved>
+      <DirectoryContent />
+    </RequireApproved>
+  );
+}
+
+function DirectoryContent() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');

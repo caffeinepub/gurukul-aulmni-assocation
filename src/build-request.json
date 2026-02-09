@@ -1,194 +1,85 @@
 {
   "kind": "build_request",
-  "title": "Create Gurukul Aulmni Assocation alumni association app (MVP)",
-  "priority": "normal",
+  "title": "Fix app stuck on loading by preventing anonymous backend queries and adding clear error states",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Create a responsive public landing page for \"Gurukul Aulmni Assocation\" that introduces the association and provides clear calls to action to sign in and explore the app.",
+      "id": "REQ-20",
+      "text": "Prevent the app from getting stuck in a perpetual loading state by ensuring user/profile/admin/approval React Query hooks do not run (and do not contribute to loading spinners) when the user is not authenticated.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-6"
         ],
         "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+          "app is ony showing loading"
         ]
       },
       "acceptanceCriteria": [
-        "Landing page displays the association name exactly as \"Gurukul Aulmni Assocation\".",
-        "Page is responsive on mobile and desktop.",
-        "Primary actions include: Sign in (Internet Identity) and Browse (read-only previews or prompt to sign in)."
+        "When signed out, navigating to any protected route (e.g., /directory, /events, /announcements, /my-profile, /gallery, /activities) shows the expected \"Authentication Required\" UI (or the membership approval UI after login), not an indefinite \"Loading...\" spinner.",
+        "When signed out, the app does not fire backend queries for current user profile, approval status, or admin status.",
+        "When signed in, current user profile / approval / admin checks still run and the protected pages behave as before."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Add Internet Identity sign-in and sign-out UI, and show the signed-in user’s principal (or a short form) in the app header/navigation.",
+      "id": "REQ-21",
+      "text": "Update the auth/approval gating UI to handle backend/query failures gracefully: if approval/admin/profile checks fail or the backend cannot be reached, show an explicit error message with a retry action instead of showing an infinite loading indicator.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-6"
         ],
         "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+          "app is ony showing loading"
         ]
       },
       "acceptanceCriteria": [
-        "User can sign in and sign out using Internet Identity.",
-        "When signed in, the UI indicates authenticated state (e.g., principal displayed).",
-        "Unauthenticated users are prompted to sign in when attempting member-only actions."
+        "If backend calls needed for a protected page fail (e.g., actor creation succeeds but queries error), the page displays an English error state (e.g., \"Unable to load data. Please try again.\") and provides a retry button.",
+        "Retrying re-attempts the failed query/queries and can recover without a full page reload.",
+        "Loading spinners are only shown while a request is actually in-flight (no permanent loading caused by disabled/blocked queries)."
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Implement alumni profile management: allow a signed-in user to create/update their own alumni profile with fields: full name, graduation year, department/major, current city/country, bio, and optional contact (email or social link).",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A signed-in user can create a profile and later edit it.",
-        "Profiles are persisted in the backend canister and reload correctly after refresh.",
-        "A user can only edit their own profile.",
-        "Validation prevents empty full name and invalid graduation year (non-numeric or unreasonable range)."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Implement a searchable alumni directory page that lists member profiles (name, graduation year, department/major, location) with filters for graduation year and department/major.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Directory loads profiles from the backend and renders a list/grid.",
-        "Search by name works (case-insensitive).",
-        "Filters (year, department/major) narrow the results.",
-        "Clicking a directory entry opens a profile detail view.",
-        "Sensitive fields marked optional contact are not shown unless present."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Add Events feature: a page to view upcoming/past events (title, date/time, location, description) and an admin-only interface to create/update/delete events.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Any user can view the list of events sorted by date.",
-        "Admin users can create, edit, and delete events from the UI.",
-        "Non-admin users cannot access event management actions (UI hidden/disabled and backend enforced).",
-        "Event changes persist and are visible to all users after refresh."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Add Announcements feature: a page to view announcements (title, date, content) and an admin-only interface to create/delete announcements.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Any user can view announcements sorted newest-first.",
-        "Admin users can create and delete announcements.",
-        "Non-admin users cannot create/delete announcements (UI + backend enforced).",
-        "Announcements persist and render correctly after refresh."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Implement backend authorization and administration: create a simple admin list managed in-canister, with a secure method for initial admin assignment and admin management actions restricted to admins only.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend enforces that only admins can mutate events/announcements and manage admin list.",
-        "There is a defined mechanism to set the first admin (e.g., canister install-time default, or first authenticated caller) and it is documented in code comments.",
-        "Unauthorized calls return clear errors (or Result-style errors) and do not change state."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Create a coherent, distinctive visual theme for the app and apply it consistently across pages (typography, color palette, spacing, and components). Avoid a blue/purple primary theme.",
+      "id": "REQ-22",
+      "text": "Ensure that the landing page (\"/\") renders reliably even if the backend is slow/unavailable by removing any dependency on backend queries for its initial render and by not showing a full-page loading state there.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-6"
         ],
         "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+          "app is ony showing loading"
         ]
       },
       "acceptanceCriteria": [
-        "App has a consistent theme across header, pages, forms, and lists.",
-        "Primary colors are not blue/purple.",
-        "Key pages (Landing, Directory, Events, Announcements, My Profile) share consistent layout and navigation."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Generate and include required static images for branding, store them in frontend/public/assets/generated, and reference them in the UI (e.g., header/landing).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All required images are present under frontend/public/assets/generated.",
-        "Landing/header renders the generated logo and hero/banner image from static assets (not served via backend).",
-        "Images display crisply at common screen sizes without distortion."
+        "Visiting \"/\" always renders the landing page content without a full-page \"Loading...\" state, regardless of backend availability.",
+        "The header and landing page still correctly reflect authenticated vs unauthenticated state once Internet Identity finishes initializing."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not modify files under frontend/src/components/ui; compose them instead.",
-    "Do not edit immutable hook/bootstrapping paths listed by the system (compose around them).",
-    "Use English for all user-facing text."
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts (immutable path).",
+    "Do not modify files under frontend/src/hooks/useActor.ts (immutable path).",
+    "Keep the backend as a single Motoko actor (no additional canisters/services).",
+    "All user-facing text must be in English."
   ],
   "nonGoals": [
-    "Payments, donations, or membership fee collection.",
-    "Real-time chat or messaging.",
-    "Email/SMS notifications or integrations with external email providers.",
-    "Third-party auth providers other than Internet Identity.",
-    "Geolocation/maps features."
+    "Adding new features unrelated to the loading issue.",
+    "Changing the approved-member workflow rules or relaxing authorization requirements.",
+    "Introducing external logging/monitoring or third-party services."
   ],
   "imageRequirements": {
-    "required": [
-      "Alumni association logo mark with academic motif (gurukul-logo.dim_512x512.png)",
-      "Wide hero/banner illustration with alumni/community/education theme (gurukul-hero.dim_1600x600.png)"
-    ],
+    "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

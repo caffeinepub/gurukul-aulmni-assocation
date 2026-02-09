@@ -1,17 +1,24 @@
 import { useState } from 'react';
 import { useGetEvents } from '@/hooks/useQueries';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useAccess } from '@/hooks/useAccess';
+import RequireApproved from '@/components/RequireApproved';
 import EventCard from '@/components/EventCard';
-import EventAdminPanel from '@/components/EventAdminPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Loader2 } from 'lucide-react';
 
 export default function EventsPage() {
+  return (
+    <RequireApproved>
+      <EventsContent />
+    </RequireApproved>
+  );
+}
+
+function EventsContent() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const { data: upcomingEvents = [], isLoading: upcomingLoading } = useGetEvents(false);
   const { data: pastEvents = [], isLoading: pastLoading } = useGetEvents(true);
-  const { isAdmin } = useIsAdmin();
 
   const isLoading = upcomingLoading || pastLoading;
 
@@ -28,12 +35,6 @@ export default function EventsPage() {
           Stay updated on reunions, networking events, and special gatherings
         </p>
       </div>
-
-      {isAdmin && (
-        <div className="mb-8">
-          <EventAdminPanel />
-        </div>
-      )}
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'upcoming' | 'past')}>
         <TabsList className="mb-6">

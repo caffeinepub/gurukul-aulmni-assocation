@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useGetCallerUserProfile, useSaveCallerUserProfile } from '@/hooks/useQueries';
-import RequireAuth from '@/components/RequireAuth';
+import RequireApproved from '@/components/RequireApproved';
 import AlumniProfileForm from '@/components/AlumniProfileForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,9 +12,9 @@ import type { AlumniProfile } from '@/backend';
 
 export default function MyProfilePage() {
   return (
-    <RequireAuth>
+    <RequireApproved>
       <MyProfileContent />
-    </RequireAuth>
+    </RequireApproved>
   );
 }
 

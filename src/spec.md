@@ -1,17 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Deliver an MVP alumni association web app for "Gurukul Aulmni Assocation" with Internet Identity authentication, member profiles, a searchable directory, and admin-managed events and announcements.
+**Goal:** Fix the app getting stuck on perpetual loading by preventing unauthenticated backend queries, adding clear error + retry states for failed gating checks, and ensuring the landing page renders without depending on backend availability.
 
 **Planned changes:**
-- Create a responsive public landing page showing "Gurukul Aulmni Assocation" with clear calls to action to Sign in (Internet Identity) and Browse (read-only previews or sign-in prompt).
-- Add Internet Identity sign-in/sign-out UI and display the signed-in user’s principal (or short form) in the header/navigation.
-- Implement alumni profile create/update for the signed-in user (full name, graduation year, department/major, city/country, bio, optional contact) with validation and ownership enforcement.
-- Build an alumni directory with backend-loaded profiles, case-insensitive name search, filters (graduation year, department/major), and a profile detail view.
-- Add events pages to view upcoming/past events, plus admin-only UI and backend enforcement for create/update/delete.
-- Add announcements pages to view announcements, plus admin-only UI and backend enforcement for create/delete.
-- Implement backend admin authorization with an in-canister admin list and a defined mechanism for initial admin assignment; ensure unauthorized mutations fail safely with clear errors.
-- Apply a coherent, distinctive visual theme across the app (avoid blue/purple as primary) and ensure consistent layout/navigation across key pages.
-- Include generated static branding images in `frontend/public/assets/generated` and reference them in the header/landing.
+- Ensure user/profile/admin/approval React Query hooks are disabled when the user is not authenticated so they do not run or contribute to loading spinners on protected routes.
+- Update protected-route auth/approval gating UI to show explicit English error states (with a retry action) when required backend checks fail, instead of infinite loading.
+- Adjust the landing page ("/") so it renders its content without any full-page loading state and without requiring backend queries for initial render, while still reflecting auth state once Internet Identity initializes.
 
-**User-visible outcome:** Users can browse the public landing experience, sign in with Internet Identity, create/edit their own alumni profile, and search/filter alumni in a directory; everyone can view events and announcements, while admins can manage events, announcements, and admin access.
+**User-visible outcome:** When signed out, protected pages show the expected “Authentication Required” (or membership approval UI after login) rather than an endless spinner; when backend checks fail, users see a clear error with a retry button; and the landing page always renders reliably even if the backend is slow/unavailable.

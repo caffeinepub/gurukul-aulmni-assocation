@@ -2,11 +2,12 @@ import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GraduationCap, Users, Calendar, Megaphone, ArrowRight } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useCurrentUser();
+  const { identity } = useInternetIdentity();
+  const isAuthenticated = !!identity;
 
   const features = [
     {

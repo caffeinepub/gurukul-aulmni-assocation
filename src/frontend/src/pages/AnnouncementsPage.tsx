@@ -1,13 +1,19 @@
 import { useGetAnnouncements } from '@/hooks/useQueries';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import RequireApproved from '@/components/RequireApproved';
 import AnnouncementCard from '@/components/AnnouncementCard';
-import AnnouncementAdminPanel from '@/components/AnnouncementAdminPanel';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Megaphone, Loader2 } from 'lucide-react';
 
 export default function AnnouncementsPage() {
+  return (
+    <RequireApproved>
+      <AnnouncementsContent />
+    </RequireApproved>
+  );
+}
+
+function AnnouncementsContent() {
   const { data: announcements = [], isLoading } = useGetAnnouncements();
-  const { isAdmin } = useIsAdmin();
 
   return (
     <div className="container py-8 md:py-12">
@@ -22,12 +28,6 @@ export default function AnnouncementsPage() {
           Stay informed with the latest news and updates from the association
         </p>
       </div>
-
-      {isAdmin && (
-        <div className="mb-8">
-          <AnnouncementAdminPanel />
-        </div>
-      )}
 
       {isLoading ? (
         <div className="flex min-h-[40vh] items-center justify-center">

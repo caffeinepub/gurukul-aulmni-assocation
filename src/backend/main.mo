@@ -3,7 +3,6 @@ import Map "mo:core/Map";
 import Set "mo:core/Set";
 import Time "mo:core/Time";
 import Array "mo:core/Array";
-import Text "mo:core/Text";
 import Order "mo:core/Order";
 import Iter "mo:core/Iter";
 import Nat64 "mo:core/Nat64";
@@ -11,10 +10,16 @@ import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import UserApproval "user-approval/approval";
+
+
+// Use migration to ensure smooth upgrade from previous version (without approval system)
 
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
+
+  let approvalState = UserApproval.initState(accessControlState);
 
   type AlumniProfile = {
     fullName : Text;
@@ -76,14 +81,33 @@ actor {
     (profile.graduationYear, profile.department);
   };
 
+  // Helper function to check if caller is approved (admin or approved user)
+  func isCallerApprovedOrAdmin(caller : Principal) : Bool {
+    AccessControl.hasPermission(accessControlState, caller, #admin) or UserApproval.isApproved(approvalState, caller);
+  };
+
+  public query ({ caller }) func isCallerApproved() : async Bool {
+    isCallerApprovedOrAdmin(caller);
+  };
+
+  // Profile functions - require user role AND approval (or admin)
   public query ({ caller }) func getCallerUserProfile() : async ?AlumniProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view profiles");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to access profiles");
     };
     alumniProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?AlumniProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view profiles");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to access profiles");
+    };
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
@@ -94,6 +118,9 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to save profiles");
+    };
     alumniProfiles.add(caller, profile);
   };
 
@@ -101,19 +128,32 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to save profiles");
+    };
     alumniProfiles.add(caller, profile);
   };
 
   public query ({ caller }) func getAlumniProfile(user : Principal) : async ?AlumniProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view profiles");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to access profiles");
+    };
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
     alumniProfiles.get(user);
   };
 
+  // Directory functions - require user role AND approval (or admin)
   public query ({ caller }) func getGraduationYears() : async [Nat16] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access directory");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to access directory");
     };
     let yearsSet = Set.empty<Nat16>();
 
@@ -128,6 +168,9 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access directory");
     };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to access directory");
+    };
     let departmentSet = Set.empty<Text>();
 
     for ((_, profile) in alumniProfiles.entries()) {
@@ -140,6 +183,9 @@ actor {
   public query ({ caller }) func searchAlumniProfiles(filterYear : ?Nat16, filterDepartment : ?Text) : async [AlumniProfile] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can search directory");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to search directory");
     };
     let filteredProfiles = alumniProfiles.values().toArray().filter(
       func(profile) {
@@ -160,6 +206,7 @@ actor {
     filteredProfiles;
   };
 
+  // Event management - admin only for create/update/delete
   public shared ({ caller }) func createEvent(event : EditableEvent) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
@@ -212,7 +259,14 @@ actor {
     };
   };
 
+  // Event viewing - require user role AND approval (or admin)
   public query ({ caller }) func getEvents(byPast : ?Bool) : async [Event] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view events");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to view events");
+    };
     let allEvents = eventEntries.values().toArray();
 
     switch (byPast) {
@@ -226,6 +280,7 @@ actor {
     };
   };
 
+  // Announcement management - admin only for create/delete
   public shared ({ caller }) func createAnnouncement(announcement : EditableAnnouncement) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
@@ -256,7 +311,14 @@ actor {
     };
   };
 
+  // Announcement viewing - require user role AND approval (or admin)
   public query ({ caller }) func getAnnouncements() : async [Announcement] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view announcements");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to view announcements");
+    };
     announcementEntries.values().toArray();
   };
 
@@ -279,6 +341,12 @@ actor {
   };
 
   public query ({ caller }) func getAnnouncementsByYearRange(startYear : ?Int16, endYear : ?Int16) : async [Announcement] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view announcements");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to view announcements");
+    };
     let allAnnouncements = announcementEntries.values().toArray();
 
     let allFiltered = filterByDateRange(
@@ -288,5 +356,24 @@ actor {
     );
 
     allFiltered;
+  };
+
+  // Approval system functions
+  public shared ({ caller }) func requestApproval() : async () {
+    UserApproval.requestApproval(approvalState, caller);
+  };
+
+  public shared ({ caller }) func setApproval(user : Principal, status : UserApproval.ApprovalStatus) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    UserApproval.setApproval(approvalState, user, status);
+  };
+
+  public query ({ caller }) func listApprovals() : async [UserApproval.UserApprovalInfo] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    UserApproval.listApprovals(approvalState);
   };
 };

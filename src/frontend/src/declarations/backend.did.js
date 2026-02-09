@@ -45,6 +45,15 @@ export const Event = IDL.Record({
   'location' : IDL.Text,
   'timestampNanos' : IDL.Nat64,
 });
+export const ApprovalStatus = IDL.Variant({
+  'pending' : IDL.Null,
+  'approved' : IDL.Null,
+  'rejected' : IDL.Null,
+});
+export const UserApprovalInfo = IDL.Record({
+  'status' : ApprovalStatus,
+  'principal' : IDL.Principal,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -75,6 +84,9 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'isCallerApproved' : IDL.Func([], [IDL.Bool], ['query']),
+  'listApprovals' : IDL.Func([], [IDL.Vec(UserApprovalInfo)], ['query']),
+  'requestApproval' : IDL.Func([], [], []),
   'saveAlumniProfile' : IDL.Func([AlumniProfile], [], []),
   'saveCallerUserProfile' : IDL.Func([AlumniProfile], [], []),
   'searchAlumniProfiles' : IDL.Func(
@@ -82,6 +94,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(AlumniProfile)],
       ['query'],
     ),
+  'setApproval' : IDL.Func([IDL.Principal, ApprovalStatus], [], []),
   'updateEvent' : IDL.Func([IDL.Nat64, EditableEvent], [], []),
 });
 
@@ -125,6 +138,15 @@ export const idlFactory = ({ IDL }) => {
     'location' : IDL.Text,
     'timestampNanos' : IDL.Nat64,
   });
+  const ApprovalStatus = IDL.Variant({
+    'pending' : IDL.Null,
+    'approved' : IDL.Null,
+    'rejected' : IDL.Null,
+  });
+  const UserApprovalInfo = IDL.Record({
+    'status' : ApprovalStatus,
+    'principal' : IDL.Principal,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -155,6 +177,9 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'isCallerApproved' : IDL.Func([], [IDL.Bool], ['query']),
+    'listApprovals' : IDL.Func([], [IDL.Vec(UserApprovalInfo)], ['query']),
+    'requestApproval' : IDL.Func([], [], []),
     'saveAlumniProfile' : IDL.Func([AlumniProfile], [], []),
     'saveCallerUserProfile' : IDL.Func([AlumniProfile], [], []),
     'searchAlumniProfiles' : IDL.Func(
@@ -162,6 +187,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(AlumniProfile)],
         ['query'],
       ),
+    'setApproval' : IDL.Func([IDL.Principal, ApprovalStatus], [], []),
     'updateEvent' : IDL.Func([IDL.Nat64, EditableEvent], [], []),
   });
 };

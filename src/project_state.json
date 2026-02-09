@@ -1,11 +1,18 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "Build an app for an alumni association named \"Gurukul Aulmni Assocation\".",
-  "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Alumni association logo mark with academic motif (gurukul-logo.dim_512x512.png)\n- Wide hero/banner illustration with alumni/community/education theme (gurukul-hero.dim_1600x600.png)",
+  "projectStateVersion": 11,
+  "summary": "Build an app for an alumni association named \"Gurukul Aulmni Assocation\", including role-based administration, content/member management, and approved-member-only access.",
+  "architectural_notes": [
+    "Add role-based access control (RBAC) beyond a single admin list; define roles/permissions for content (posts/announcements) and member management actions.",
+    "Introduce an approval state for members and enforce it during authentication/authorization so unapproved users cannot access the app.",
+    "Add support for user-uploaded profile pictures (storage, URLs, privacy: visible to all) with a placeholder fallback.",
+    "Add data model + admin CRUD for Executive Committee entries, including historical/past committees.",
+    "Add content models/pages for Gallery and Acts & Activities (likely admin-managed)."
+  ],
+  "known_issues": [
+    "App is only showing a loading state (stuck on loading / not rendering content)."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-a-responsive-public-landing-page-for-gurukul-aulmni-assocation-that-introduces-the-association-and-provides-clear-calls-to-action-to-sign-in-and-explore-the-app",
@@ -70,6 +77,86 @@
         "REQ-9"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-implement-an-approved-member-workflow-so-that-signing-in-with-internet-identity-is-not-sufficient-to-use-the-app-a-principal-must-be-registered-as-a-member-and-marked-as-approved-before-they-can-access-any-authenticated-features-directory-events-announcements-profile",
+      "title": "Implement an approved-member workflow so that signing in with Internet Identity is not sufficient to use the app: a principal must be registered as a member and marked as Approved before they can access any authenticated features (directory, events, announcements, profile).",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-admin-dashboard-page-in-the-frontend-with-role-aware-navigation-and-tools-to-manage-announcements-posts-events-and-members-approve-reject-suspend-remove-based-on-the-signed-in-user-s-roles-permissions",
+      "title": "Create an Admin Dashboard page in the frontend with role-aware navigation and tools to manage announcements (\"posts\"), events, and members (approve/reject/suspend/remove) based on the signed-in user’s roles/permissions.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-existing-frontend-auth-gating-to-incorporate-approval-status-not-just-isauthenticated-all-non-public-pages-must-require-an-approved-membership-while-the-landing-page-remains-public",
+      "title": "Update existing frontend auth gating to incorporate approval status (not just \"isAuthenticated\"): all non-public pages must require an Approved membership, while the landing page remains public.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-dashboard-page-is-accessible-from-the-app-s-top-navigation-bar-by-adding-a-clearly-labeled-admin-navigation-item-that-appears-in-the-header-navigation-desktop-and-in-the-mobile-menu-when-the-signed-in-user-has-admin-permissions",
+      "title": "Ensure the Admin Dashboard page is accessible from the app’s top navigation bar by adding a clearly labeled \"Admin\" navigation item that appears in the header navigation (desktop) and in the mobile menu when the signed-in user has admin permissions.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-authenticated-page-route-gallery-that-shows-an-alumni-gallery-page-english-ui-text-gated-behind-the-existing-approved-member-workflow-i-e-the-page-must-use-the-same-requireapproved-wrapper-pattern-as-directory-events-announcements-my-profile",
+      "title": "Create a new authenticated page route \"/gallery\" that shows an Alumni Gallery page (English UI text), gated behind the existing Approved-member workflow (i.e., the page must use the same RequireApproved wrapper pattern as Directory/Events/Announcements/My Profile).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-authenticated-page-route-activities-that-shows-an-acts-activities-page-for-the-alumni-english-ui-text-gated-behind-the-existing-approved-member-workflow-i-e-the-page-must-use-the-same-requireapproved-wrapper-pattern-as-directory-events-announcements-my-profile",
+      "title": "Create a new authenticated page route \"/activities\" that shows an \"Acts & Activities\" page for the alumni (English UI text), gated behind the existing Approved-member workflow (i.e., the page must use the same RequireApproved wrapper pattern as Directory/Events/Announcements/My Profile).",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-top-navigation-desktop-and-mobile-menu-to-include-links-to-the-new-pages-gallery-to-gallery-and-acts-activities-to-activities-consistent-with-the-existing-navigation-link-behavior",
+      "title": "Update the top navigation (desktop) and mobile menu to include links to the new pages: \"Gallery\" (to \"/gallery\") and \"Acts & Activities\" (to \"/activities\"), consistent with the existing navigation link behavior.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-prevent-the-app-from-getting-stuck-in-a-perpetual-loading-state-by-ensuring-user-profile-admin-approval-react-query-hooks-do-not-run-and-do-not-contribute-to-loading-spinners-when-the-user-is-not-authenticated",
+      "title": "Prevent the app from getting stuck in a perpetual loading state by ensuring user/profile/admin/approval React Query hooks do not run (and do not contribute to loading spinners) when the user is not authenticated.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-auth-approval-gating-ui-to-handle-backend-query-failures-gracefully-if-approval-admin-profile-checks-fail-or-the-backend-cannot-be-reached-show-an-explicit-error-message-with-a-retry-action-instead-of-showing-an-infinite-loading-indicator",
+      "title": "Update the auth/approval gating UI to handle backend/query failures gracefully: if approval/admin/profile checks fail or the backend cannot be reached, show an explicit error message with a retry action instead of showing an infinite loading indicator.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-that-the-landing-page-renders-reliably-even-if-the-backend-is-slow-unavailable-by-removing-any-dependency-on-backend-queries-for-its-initial-render-and-by-not-showing-a-full-page-loading-state-there",
+      "title": "Ensure that the landing page (\"/\") renders reliably even if the backend is slow/unavailable by removing any dependency on backend queries for its initial render and by not showing a full-page loading state there.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -85,6 +172,84 @@
       "reqIds": [
         "REQ-7"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Create an admin dashboard/page with role-based access control (multiple roles) for managing posts/announcements and members (edit/remove/add, etc.).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Implement approved-member-only access: add member approval workflow so only approved members can log in/use the app.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add backend data models and APIs for member administration: admins can list members, approve/reject/suspend members, and remove members from the system.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Implement role-based access control (multiple roles) beyond the current admin check, so different roles can manage different resources (e.g., announcements/posts, events, member approval/removal).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Ensure the backend upgrade is safe: if new persistent state is introduced for membership status and roles, add the required upgrade/migration handling so existing deployed data (profiles/events/announcements) is not lost when updating the canister.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Add an Admin page link/button in the app’s top navigation bar (showing it appropriately based on user role/permissions).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Show the signer’s name in the Admin Portal for membership approval requests (when users sign up and submit for approval).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "In the Admin Portal, display the list of already-approved members/emails (in addition to pending approvals).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Add public profile pictures: allow members to upload a profile pic and display it anywhere profiles appear (e.g., directory), with a default placeholder when missing.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Add an Executive Committee page (including past committees) and provide an admin interface to add/edit/remove committee members.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Create a Gallery page for the alumni association app.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Create an Acts & Activities page for the alumni association app.",
+      "reqIds": [],
       "status": "pending"
     }
   ],

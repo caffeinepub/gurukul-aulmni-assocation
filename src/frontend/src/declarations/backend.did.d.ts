@@ -25,6 +25,9 @@ export interface Announcement {
   'content' : string,
   'timestampNanos' : bigint,
 }
+export type ApprovalStatus = { 'pending' : null } |
+  { 'approved' : null } |
+  { 'rejected' : null };
 export interface EditableAnnouncement { 'title' : string, 'content' : string }
 export interface EditableEvent {
   'title' : string,
@@ -38,6 +41,10 @@ export interface Event {
   'description' : string,
   'location' : string,
   'timestampNanos' : bigint,
+}
+export interface UserApprovalInfo {
+  'status' : ApprovalStatus,
+  'principal' : Principal,
 }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -62,12 +69,16 @@ export interface _SERVICE {
   'getGraduationYears' : ActorMethod<[], Uint16Array>,
   'getUserProfile' : ActorMethod<[Principal], [] | [AlumniProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'isCallerApproved' : ActorMethod<[], boolean>,
+  'listApprovals' : ActorMethod<[], Array<UserApprovalInfo>>,
+  'requestApproval' : ActorMethod<[], undefined>,
   'saveAlumniProfile' : ActorMethod<[AlumniProfile], undefined>,
   'saveCallerUserProfile' : ActorMethod<[AlumniProfile], undefined>,
   'searchAlumniProfiles' : ActorMethod<
     [[] | [number], [] | [string]],
     Array<AlumniProfile>
   >,
+  'setApproval' : ActorMethod<[Principal, ApprovalStatus], undefined>,
   'updateEvent' : ActorMethod<[bigint, EditableEvent], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

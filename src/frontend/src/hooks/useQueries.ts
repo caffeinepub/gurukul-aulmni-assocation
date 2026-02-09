@@ -1,28 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { AlumniProfile, Event, Announcement, EditableEvent, EditableAnnouncement } from '@/backend';
+import { useInternetIdentity } from './useInternetIdentity';
+import type { AlumniProfile, Event, Announcement, EditableEvent, EditableAnnouncement, UserApprovalInfo, ApprovalStatus } from '@/backend';
+import { Principal } from '@icp-sdk/core/principal';
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const isAuthenticated = !!identity;
 
   const query = useQuery<AlumniProfile | null>({
     queryKey: ['currentUserProfile'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      try {
-        return await actor.getCallerUserProfile();
-      } catch {
-        return null;
-      }
+      return await actor.getCallerUserProfile();
     },
-    enabled: !!actor && !actorFetching,
+    enabled: !!actor && !actorFetching && isAuthenticated,
     retry: false,
   });
 
   return {
     ...query,
-    isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && query.isFetched,
+    isLoading: isAuthenticated && (actorFetching || query.isLoading),
+    isFetched: isAuthenticated && !!actor && query.isFetched,
   };
 }
 
@@ -51,11 +51,7 @@ export function useSearchAlumniProfiles(filterYear?: number | null, filterDepart
     queryKey: ['alumniProfiles', filterYear, filterDepartment],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        return await actor.searchAlumniProfiles(filterYear || null, filterDepartment || null);
-      } catch {
-        return [];
-      }
+      return await actor.searchAlumniProfiles(filterYear || null, filterDepartment || null);
     },
     enabled: !!actor && !actorFetching,
   });
@@ -68,12 +64,8 @@ export function useGetGraduationYears() {
     queryKey: ['graduationYears'],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        const years = await actor.getGraduationYears();
-        return Array.from(years).sort((a, b) => b - a);
-      } catch {
-        return [];
-      }
+      const years = await actor.getGraduationYears();
+      return Array.from(years).sort((a, b) => b - a);
     },
     enabled: !!actor && !actorFetching,
   });
@@ -86,12 +78,8 @@ export function useGetDepartments() {
     queryKey: ['departments'],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        const depts = await actor.getDepartments();
-        return depts.sort();
-      } catch {
-        return [];
-      }
+      const depts = await actor.getDepartments();
+      return depts.sort();
     },
     enabled: !!actor && !actorFetching,
   });
@@ -104,12 +92,8 @@ export function useGetEvents(byPast?: boolean | null) {
     queryKey: ['events', byPast],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        const events = await actor.getEvents(byPast || null);
-        return events.sort((a, b) => Number(a.timestampNanos - b.timestampNanos));
-      } catch {
-        return [];
-      }
+      const events = await actor.getEvents(byPast || null);
+      return events.sort((a, b) => Number(a.timestampNanos - b.timestampNanos));
     },
     enabled: !!actor && !actorFetching,
   });
@@ -167,12 +151,8 @@ export function useGetAnnouncements() {
     queryKey: ['announcements'],
     queryFn: async () => {
       if (!actor) return [];
-      try {
-        const announcements = await actor.getAnnouncements();
-        return announcements.sort((a, b) => Number(b.timestampNanos - a.timestampNanos));
-      } catch {
-        return [];
-      }
+      const announcements = await actor.getAnnouncements();
+      return announcements.sort((a, b) => Number(b.timestampNanos - a.timestampNanos));
     },
     enabled: !!actor && !actorFetching,
   });
@@ -204,6 +184,84 @@ export function useDeleteAnnouncement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements'] });
+    },
+  });
+}
+
+// Approval system hooks
+export function useIsCallerApproved() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const isAuthenticated = !!identity;
+
+  const query = useQuery<boolean>({
+    queryKey: ['isApproved'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return await actor.isCallerApproved();
+    },
+    enabled: !!actor && !actorFetching && isAuthenticated,
+    retry: false,
+  });
+
+  return {
+    isApproved: query.data || false,
+    isLoading: isAuthenticated && (actorFetching || query.isLoading),
+    isFetched: isAuthenticated && !!actor && query.isFetched,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+  };
+}
+
+export function useRequestApproval() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return await actor.requestApproval();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['isApproved'] });
+    },
+  });
+}
+
+export function useListApprovals() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const isAuthenticated = !!identity;
+
+  const query = useQuery<UserApprovalInfo[]>({
+    queryKey: ['approvals'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return await actor.listApprovals();
+    },
+    enabled: !!actor && !actorFetching && isAuthenticated,
+  });
+
+  return {
+    ...query,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+  };
+}
+
+export function useSetApproval() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ user, status }: { user: Principal; status: ApprovalStatus }) => {
+      if (!actor) throw new Error('Actor not available');
+      return await actor.setApproval(user, status);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['approvals'] });
     },
   });
 }

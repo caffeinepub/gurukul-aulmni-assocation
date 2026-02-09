@@ -1,20 +1,24 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { Menu, X, GraduationCap } from 'lucide-react';
+import { Menu, GraduationCap, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AuthButton from './AuthButton';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 export default function AppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, userProfile, principalShort } = useCurrentUser();
+  const { isAdmin } = useIsAdmin();
 
   const navLinks = [
     { label: 'Directory', path: '/directory' },
     { label: 'Events', path: '/events' },
     { label: 'Announcements', path: '/announcements' },
+    { label: 'Gallery', path: '/gallery' },
+    { label: 'Acts & Activities', path: '/activities' },
   ];
 
   return (
@@ -43,6 +47,16 @@ export default function AppHeader() {
                 {link.label}
               </Button>
             ))}
+            {isAuthenticated && isAdmin && (
+              <Button
+                variant="ghost"
+                onClick={() => navigate({ to: '/admin' })}
+                className="text-sm font-medium"
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                Admin
+              </Button>
+            )}
           </nav>
         </div>
 
@@ -91,6 +105,19 @@ export default function AppHeader() {
                     {link.label}
                   </Button>
                 ))}
+                {isAuthenticated && isAdmin && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      navigate({ to: '/admin' });
+                      setMobileMenuOpen(false);
+                    }}
+                    className="justify-start"
+                  >
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin
+                  </Button>
+                )}
               </div>
             </SheetContent>
           </Sheet>

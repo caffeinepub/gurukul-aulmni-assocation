@@ -2,7 +2,7 @@ import { useInternetIdentity } from './useInternetIdentity';
 import { useGetCallerUserProfile } from './useQueries';
 
 export function useCurrentUser() {
-  const { identity, loginStatus } = useInternetIdentity();
+  const { identity, loginStatus, isInitializing } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
 
   const isAuthenticated = !!identity;
@@ -15,7 +15,7 @@ export function useCurrentUser() {
     principal,
     principalShort,
     userProfile: userProfile || null,
-    isLoading: loginStatus === 'initializing' || profileLoading,
+    isLoading: isInitializing || (isAuthenticated && profileLoading),
     isFetched,
   };
 }
