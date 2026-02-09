@@ -55,6 +55,15 @@ export const Announcement = IDL.Record({
   'content' : IDL.Text,
   'timestampNanos' : IDL.Int,
 });
+export const BackendStatus = IDL.Record({
+  'totalActivities' : IDL.Nat,
+  'totalAnnouncements' : IDL.Nat,
+  'totalGalleryImages' : IDL.Nat,
+  'totalEvents' : IDL.Nat,
+  'totalPendingUsers' : IDL.Nat,
+  'totalAlumniProfiles' : IDL.Nat,
+  'totalApprovedUsers' : IDL.Nat,
+});
 export const Event = IDL.Record({
   'id' : IDL.Nat64,
   'title' : IDL.Text,
@@ -78,16 +87,30 @@ export const UserApprovalInfo = IDL.Record({
   'status' : ApprovalStatus,
   'principal' : IDL.Principal,
 });
+export const BackendSnapshot = IDL.Record({
+  'id' : IDL.Nat,
+  'totalActivities' : IDL.Nat,
+  'totalAnnouncements' : IDL.Nat,
+  'totalGalleryImages' : IDL.Nat,
+  'totalEvents' : IDL.Nat,
+  'totalPendingUsers' : IDL.Nat,
+  'totalAlumniProfiles' : IDL.Nat,
+  'capturedAt' : IDL.Int,
+  'totalApprovedUsers' : IDL.Nat,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'clearAllBackendSnapshots' : IDL.Func([], [], []),
   'createActivity' : IDL.Func([EditableActivity], [], []),
   'createAnnouncement' : IDL.Func([EditableAnnouncement], [], []),
+  'createBackendSnapshot' : IDL.Func([], [IDL.Nat], []),
   'createEvent' : IDL.Func([EditableEvent], [], []),
   'createGalleryImage' : IDL.Func([EditableGalleryImage], [], []),
   'deleteActivity' : IDL.Func([IDL.Nat64], [], []),
   'deleteAnnouncement' : IDL.Func([IDL.Nat64], [], []),
+  'deleteBackendSnapshot' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteEvent' : IDL.Func([IDL.Nat64], [], []),
   'deleteGalleryImage' : IDL.Func([IDL.Nat64], [], []),
   'getActivities' : IDL.Func([], [IDL.Vec(Activity)], ['query']),
@@ -102,6 +125,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(Announcement)],
       ['query'],
     ),
+  'getBackendStatus' : IDL.Func([], [BackendStatus], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(AlumniProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getDepartments' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
@@ -130,6 +154,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'listApprovals' : IDL.Func([], [IDL.Vec(UserApprovalInfo)], ['query']),
+  'listBackendSnapshots' : IDL.Func([], [IDL.Vec(BackendSnapshot)], ['query']),
   'requestApproval' : IDL.Func([], [], []),
   'saveAlumniProfile' : IDL.Func([AlumniProfile], [], []),
   'saveCallerUserProfile' : IDL.Func([AlumniProfile], [], []),
@@ -194,6 +219,15 @@ export const idlFactory = ({ IDL }) => {
     'content' : IDL.Text,
     'timestampNanos' : IDL.Int,
   });
+  const BackendStatus = IDL.Record({
+    'totalActivities' : IDL.Nat,
+    'totalAnnouncements' : IDL.Nat,
+    'totalGalleryImages' : IDL.Nat,
+    'totalEvents' : IDL.Nat,
+    'totalPendingUsers' : IDL.Nat,
+    'totalAlumniProfiles' : IDL.Nat,
+    'totalApprovedUsers' : IDL.Nat,
+  });
   const Event = IDL.Record({
     'id' : IDL.Nat64,
     'title' : IDL.Text,
@@ -217,16 +251,30 @@ export const idlFactory = ({ IDL }) => {
     'status' : ApprovalStatus,
     'principal' : IDL.Principal,
   });
+  const BackendSnapshot = IDL.Record({
+    'id' : IDL.Nat,
+    'totalActivities' : IDL.Nat,
+    'totalAnnouncements' : IDL.Nat,
+    'totalGalleryImages' : IDL.Nat,
+    'totalEvents' : IDL.Nat,
+    'totalPendingUsers' : IDL.Nat,
+    'totalAlumniProfiles' : IDL.Nat,
+    'capturedAt' : IDL.Int,
+    'totalApprovedUsers' : IDL.Nat,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'clearAllBackendSnapshots' : IDL.Func([], [], []),
     'createActivity' : IDL.Func([EditableActivity], [], []),
     'createAnnouncement' : IDL.Func([EditableAnnouncement], [], []),
+    'createBackendSnapshot' : IDL.Func([], [IDL.Nat], []),
     'createEvent' : IDL.Func([EditableEvent], [], []),
     'createGalleryImage' : IDL.Func([EditableGalleryImage], [], []),
     'deleteActivity' : IDL.Func([IDL.Nat64], [], []),
     'deleteAnnouncement' : IDL.Func([IDL.Nat64], [], []),
+    'deleteBackendSnapshot' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteEvent' : IDL.Func([IDL.Nat64], [], []),
     'deleteGalleryImage' : IDL.Func([IDL.Nat64], [], []),
     'getActivities' : IDL.Func([], [IDL.Vec(Activity)], ['query']),
@@ -241,6 +289,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(Announcement)],
         ['query'],
       ),
+    'getBackendStatus' : IDL.Func([], [BackendStatus], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(AlumniProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getDepartments' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
@@ -269,6 +318,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'listApprovals' : IDL.Func([], [IDL.Vec(UserApprovalInfo)], ['query']),
+    'listBackendSnapshots' : IDL.Func(
+        [],
+        [IDL.Vec(BackendSnapshot)],
+        ['query'],
+      ),
     'requestApproval' : IDL.Func([], [], []),
     'saveAlumniProfile' : IDL.Func([AlumniProfile], [], []),
     'saveCallerUserProfile' : IDL.Func([AlumniProfile], [], []),

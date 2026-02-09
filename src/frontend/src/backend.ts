@@ -98,14 +98,41 @@ export interface AlumniProfile {
     currentCity: string;
     department: string;
 }
-export interface UserApprovalInfo {
-    status: ApprovalStatus;
-    principal: Principal;
-}
 export interface EditableActivity {
     title: string;
     description: string;
     photos: Array<string>;
+}
+export interface BackendStatus {
+    totalActivities: bigint;
+    totalAnnouncements: bigint;
+    totalGalleryImages: bigint;
+    totalEvents: bigint;
+    totalPendingUsers: bigint;
+    totalAlumniProfiles: bigint;
+    totalApprovedUsers: bigint;
+}
+export interface BackendSnapshot {
+    id: bigint;
+    totalActivities: bigint;
+    totalAnnouncements: bigint;
+    totalGalleryImages: bigint;
+    totalEvents: bigint;
+    totalPendingUsers: bigint;
+    totalAlumniProfiles: bigint;
+    capturedAt: bigint;
+    totalApprovedUsers: bigint;
+}
+export interface Event {
+    id: bigint;
+    title: string;
+    description: string;
+    location: string;
+    timestampNanos: bigint;
+}
+export interface UserApprovalInfo {
+    status: ApprovalStatus;
+    principal: Principal;
 }
 export interface Activity {
     id: bigint;
@@ -122,13 +149,6 @@ export interface GalleryImage {
     timestampNanos: bigint;
 }
 export interface EditableEvent {
-    title: string;
-    description: string;
-    location: string;
-    timestampNanos: bigint;
-}
-export interface Event {
-    id: bigint;
     title: string;
     description: string;
     location: string;
@@ -162,18 +182,22 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    clearAllBackendSnapshots(): Promise<void>;
     createActivity(activity: EditableActivity): Promise<void>;
     createAnnouncement(announcement: EditableAnnouncement): Promise<void>;
+    createBackendSnapshot(): Promise<bigint>;
     createEvent(event: EditableEvent): Promise<void>;
     createGalleryImage(image: EditableGalleryImage): Promise<void>;
     deleteActivity(id: bigint): Promise<void>;
     deleteAnnouncement(id: bigint): Promise<void>;
+    deleteBackendSnapshot(id: bigint): Promise<boolean>;
     deleteEvent(id: bigint): Promise<void>;
     deleteGalleryImage(id: bigint): Promise<void>;
     getActivities(): Promise<Array<Activity>>;
     getAlumniProfile(user: Principal): Promise<AlumniProfile | null>;
     getAnnouncements(): Promise<Array<Announcement>>;
     getAnnouncementsByYearRange(startYear: number | null, endYear: number | null): Promise<Array<Announcement>>;
+    getBackendStatus(): Promise<BackendStatus>;
     getCallerUserProfile(): Promise<AlumniProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getDepartments(): Promise<Array<string>>;
@@ -186,6 +210,7 @@ export interface backendInterface {
     listApprovalStates(): Promise<Array<[Principal, ApprovalStatus]>>;
     listApprovalStatesWithProfiles(): Promise<Array<[Principal, ApprovalStatus, AlumniProfile | null]>>;
     listApprovals(): Promise<Array<UserApprovalInfo>>;
+    listBackendSnapshots(): Promise<Array<BackendSnapshot>>;
     requestApproval(): Promise<void>;
     saveAlumniProfile(profile: AlumniProfile): Promise<void>;
     saveCallerUserProfile(profile: AlumniProfile): Promise<void>;
@@ -226,6 +251,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async clearAllBackendSnapshots(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.clearAllBackendSnapshots();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.clearAllBackendSnapshots();
+            return result;
+        }
+    }
     async createActivity(arg0: EditableActivity): Promise<void> {
         if (this.processError) {
             try {
@@ -251,6 +290,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.createAnnouncement(arg0);
+            return result;
+        }
+    }
+    async createBackendSnapshot(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createBackendSnapshot();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createBackendSnapshot();
             return result;
         }
     }
@@ -307,6 +360,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deleteAnnouncement(arg0);
+            return result;
+        }
+    }
+    async deleteBackendSnapshot(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteBackendSnapshot(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteBackendSnapshot(arg0);
             return result;
         }
     }
@@ -391,6 +458,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getAnnouncementsByYearRange(to_candid_opt_n7(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n7(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async getBackendStatus(): Promise<BackendStatus> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBackendStatus();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBackendStatus();
             return result;
         }
     }
@@ -560,6 +641,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.listApprovals();
             return from_candid_vec_n17(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async listBackendSnapshots(): Promise<Array<BackendSnapshot>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listBackendSnapshots();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listBackendSnapshots();
+            return result;
         }
     }
     async requestApproval(): Promise<void> {

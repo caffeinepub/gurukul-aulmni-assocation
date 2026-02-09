@@ -10,6 +10,7 @@ import MyProfilePage from './pages/MyProfilePage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import GalleryPage from './pages/GalleryPage';
 import ActivitiesPage from './pages/ActivitiesPage';
+import BackendPage from './pages/BackendPage';
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -67,6 +68,12 @@ const activitiesRoute = createRoute({
   component: ActivitiesPage,
 });
 
+const backendRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/backend',
+  component: BackendPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   directoryRoute,
@@ -76,6 +83,7 @@ const routeTree = rootRoute.addChildren([
   adminRoute,
   galleryRoute,
   activitiesRoute,
+  backendRoute,
 ]);
 
 const router = createRouter({ routeTree });

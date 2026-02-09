@@ -1,13 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Enable admins to manage Gallery and Acts & Activities content via backend APIs and Admin Dashboard UI, and render these sections from backend data for approved members.
+**Goal:** Persist admin-only Backend status snapshots inside the Motoko canister state and show/manage them as a table with history on the Backend page.
 
 **Planned changes:**
-- Add backend data models and admin-only create/update/delete APIs for Gallery items and Acts & Activities items, plus approved-member (or admin) read/list APIs with consistent access enforcement and clear unauthorized trap messages.
-- Ensure new Gallery/Activities state persists across canister upgrades without impacting existing stored state (profiles, events, announcements, approvals, authorization/admin config).
-- Add React Query hooks to list and mutate Gallery/Activities content (admin-only mutations), gated by actor readiness and authentication, with cache invalidation after successful mutations.
-- Update `/gallery` and `/activities` pages to use backend-driven content (remove placeholder/hardcoded arrays), preserve `RequireApproved` gating, and show English empty/error states with retry.
-- Add Admin Dashboard UI for admins to create, edit, and delete Gallery and Acts & Activities items with English validation/errors and without full page refresh on updates.
+- Add an in-canister, upgrade-safe snapshot data model to store Backend status rows (id, capturedAt timestamp, and the existing count fields from getBackendStatus), protected by the existing admin guard.
+- Implement admin-only backend APIs to capture a new snapshot, list snapshots (newest first), delete a snapshot by id, and clear all snapshots (with explicit errors for missing ids).
+- Update the admin-only Backend page to display persisted snapshots in a sheet-like table, with actions to capture, refresh, delete rows, and clear all (with confirmation), and English loading/empty/error states.
+- Add/extend React Query hooks to query and mutate snapshots only when authenticated/actor is available, and to invalidate/refetch the snapshot list after mutations.
 
-**User-visible outcome:** Admins can add/edit/delete Gallery and Acts & Activities entries from the Admin Dashboard; approved members can view the updated Gallery and Activities pages populated from backend data, with clear empty/error messaging.
+**User-visible outcome:** Admins can capture Backend status snapshots into a persistent table, view the full snapshot history in a table on the Backend page, and delete individual snapshots or clear all snapshots, with updates reflected without reloading.

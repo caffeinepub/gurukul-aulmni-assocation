@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-react-query-hooks-for-listing-and-mutating-gallery-and-acts-activities-content-following-the-existing-patterns-in-frontend-src-hooks-usequeries-ts-actor-availability-checks-cache-invalidation-and-no-unauthenticated-querying",
-      "featureTitle": "Add React Query hooks for listing and mutating Gallery and Acts & Activities content, following the existing patterns in frontend/src/hooks/useQueries.ts (actor availability checks, cache invalidation, and no unauthenticated querying).",
+      "featureId": "feature-update-the-existing-admin-only-backend-page-frontend-src-pages-backendpage-tsx-to-display-the-stored-backend-status-snapshots-in-a-clear-table-sheet-like-view-including-captured-timestamp-and-all-count-columns-and-provide-controls-to-1-capture-a-new-snapshot-row-2-refresh-the-table-and-3-delete-a-row-and-or-clear-all-rows-use-english-user-facing-text",
+      "featureTitle": "Update the existing admin-only Backend page (frontend/src/pages/BackendPage.tsx) to display the stored backend status snapshots in a clear table (sheet-like) view, including captured timestamp and all count columns, and provide controls to: (1) capture a new snapshot row, (2) refresh the table, and (3) delete a row and/or clear all rows. Use English user-facing text.",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/pages/BackendPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,16 +17,15 @@
         "user-approval@3.0.0"
       ],
       "testIds": [
-        "REQ-32"
+        "REQ-43"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-gallery-page-gallery-and-acts-activities-page-activities-to-display-backend-driven-content-instead-of-placeholder-arrays-while-preserving-the-existing-requireapproved-gating-and-showing-a-clear-empty-state-message-when-no-items-exist",
-      "featureTitle": "Update the Gallery page (/gallery) and Acts & Activities page (/activities) to display backend-driven content (instead of placeholder arrays), while preserving the existing RequireApproved gating and showing a clear empty-state message when no items exist.",
+      "featureId": "feature-add-react-query-hooks-or-extend-existing-hooks-to-fetch-and-mutate-backend-status-snapshots-following-existing-patterns-in-frontend-src-hooks-actor-availability-checks-no-unauthenticated-querying-and-proper-cache-invalidation-after-mutations",
+      "featureTitle": "Add React Query hooks (or extend existing hooks) to fetch and mutate backend status snapshots, following existing patterns in frontend/src/hooks (actor availability checks, no unauthenticated querying, and proper cache invalidation after mutations).",
       "files": [
-        "frontend/src/pages/ActivitiesPage.tsx",
-        "frontend/src/pages/GalleryPage.tsx"
+        "frontend/src/hooks/useBackendSnapshots.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -38,31 +37,7 @@
         "user-approval@3.0.0"
       ],
       "testIds": [
-        "REQ-33"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-admin-ui-in-the-admin-dashboard-to-manage-gallery-and-acts-activities-content-create-edit-delete-using-english-user-facing-text-and-respecting-existing-role-permission-gating-used-by-the-admin-dashboard",
-      "featureTitle": "Add admin UI in the Admin Dashboard to manage Gallery and Acts & Activities content (create, edit, delete), using English user-facing text and respecting existing role/permission gating used by the Admin Dashboard.",
-      "files": [
-        "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
-        "frontend/src/components/admin/ActivityEditorDialog.tsx",
-        "frontend/src/components/admin/GalleryAdminPanel.tsx",
-        "frontend/src/components/admin/GalleryEditorDialog.tsx",
-        "frontend/src/pages/AdminDashboardPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "user-approval@3.0.0"
-      ],
-      "testIds": [
-        "REQ-34"
+        "REQ-44"
       ],
       "confidence": "high"
     }

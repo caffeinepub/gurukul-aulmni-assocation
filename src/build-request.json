@@ -1,116 +1,111 @@
 {
   "kind": "build_request",
-  "title": "Add admin-managed content for Gallery and Acts & Activities",
+  "title": "Persist Backend page status data in a database-like table with history",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-30",
-      "text": "Add backend data models and APIs to support admin-managed content for the Gallery and Acts & Activities sections, including admin-only create/update/delete operations and approved-member read/list operations.",
+      "id": "REQ-40",
+      "text": "Add a persistent, database-like backend data model to store Backend page status snapshots (a \"sheet/table\" of rows) inside the Motoko canister state, where each row includes a unique id, a capturedAt timestamp, and the same count fields currently returned by getBackendStatus (profiles, events, announcements, gallery images, activities, approved users, pending users). Access must be admin-only.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "recent-messages"
         ],
         "quotes": [
-          "there is no way to add in acts & activites & in gallary"
+          "You create the backend page, but I need the data to be stored in a database, like in a sheet or table."
         ]
       },
       "acceptanceCriteria": [
-        "Backend exposes admin-only methods to create, update, and delete Gallery items.",
-        "Backend exposes admin-only methods to create, update, and delete Acts & Activities items.",
-        "Backend exposes approved-member (or admin) query methods to list Gallery items and list Activities items.",
-        "All new read/list queries enforce the same access rules as other authenticated resources (user permission + approved member or admin).",
-        "All new write methods are restricted to admins and return clear trap messages on unauthorized access."
+        "Backend compiles and deploys with a new persisted snapshot table/collection stored in-canister (no external database).",
+        "Each snapshot row contains: id, capturedAt timestamp, totalAlumniProfiles, totalEvents, totalAnnouncements, totalGalleryImages, totalActivities, totalApprovedUsers, totalPendingUsers.",
+        "All snapshot read/write APIs are protected by the existing adminGuard (admins only)."
       ]
     },
     {
-      "id": "REQ-31",
-      "text": "Ensure the new Gallery/Activities backend state is upgrade-safe and does not erase existing deployed state (profiles, events, announcements, approvals, and authorization data) when the canister is upgraded.",
+      "id": "REQ-41",
+      "text": "Implement backend APIs to manage the stored backend status snapshots so the data can be viewed and managed as a table: (1) create/capture a new snapshot row, (2) list snapshot rows (most recent first), and (3) delete a snapshot row and/or clear all snapshots.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "recent-messages"
         ],
         "quotes": [
-          "there is no way to add in acts & activites & in gallary"
+          "i need in database things. like sheet or table"
         ]
       },
       "acceptanceCriteria": [
-        "After upgrading, previously stored alumni profiles, events, announcements, approvals, and authorization/admin configuration remain intact.",
-        "New Gallery and Activities items persist across canister upgrades.",
-        "If migration code is required by the project’s migration policy, add/adjust backend/migration.mo accordingly; otherwise keep changes confined to backend/main.mo in a way that preserves existing state."
+        "There is an admin-only update call that captures the current backend status and appends it as a new stored row.",
+        "There is an admin-only query call that returns the list of stored snapshot rows, ordered newest-to-oldest.",
+        "There is an admin-only method to delete a single snapshot (by id) and/or clear all snapshots.",
+        "Error messages for missing ids are explicit (e.g., \"Snapshot does not exist\")."
       ]
     },
     {
-      "id": "REQ-32",
-      "text": "Add React Query hooks for listing and mutating Gallery and Acts & Activities content, following the existing patterns in frontend/src/hooks/useQueries.ts (actor availability checks, cache invalidation, and no unauthenticated querying).",
-      "target": "frontend",
+      "id": "REQ-42",
+      "text": "Ensure the new backend snapshot storage is upgrade-safe and does not erase any existing deployed state (profiles, events, announcements, approvals, authorization data). Add conditional upgrade/migration handling only if required by the current persistence approach.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "recent-messages"
         ],
         "quotes": [
-          "there is no way to add in acts & activites & in gallary"
+          "I need the data to be stored in a database, like in a sheet or table."
         ]
       },
       "acceptanceCriteria": [
-        "frontend/src/hooks/useQueries.ts includes hooks to list Gallery items and list Activities items.",
-        "frontend/src/hooks/useQueries.ts includes hooks for admin-only mutations to create/update/delete Gallery items and Activities items.",
-        "All new queries are disabled when the actor is not ready and do not run when the user is not authenticated (consistent with existing hooks that gate by identity).",
-        "Successful mutations invalidate the relevant list query keys so the pages refresh without manual reload."
+        "After an upgrade, existing application data remains available (profiles/events/announcements/gallery/activities/approvals/admin access).",
+        "After an upgrade, previously captured backend status snapshots (if any existed) remain available.",
+        "If a migration is introduced, it is conditional and preserves existing state."
       ]
     },
     {
-      "id": "REQ-33",
-      "text": "Update the Gallery page (/gallery) and Acts & Activities page (/activities) to display backend-driven content (instead of placeholder arrays), while preserving the existing RequireApproved gating and showing a clear empty-state message when no items exist.",
+      "id": "REQ-43",
+      "text": "Update the existing admin-only Backend page (frontend/src/pages/BackendPage.tsx) to display the stored backend status snapshots in a clear table (sheet-like) view, including captured timestamp and all count columns, and provide controls to: (1) capture a new snapshot row, (2) refresh the table, and (3) delete a row and/or clear all rows. Use English user-facing text.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "recent-messages"
         ],
         "quotes": [
-          "there is no way to add in acts & activites & in gallary"
+          "I need the data to be stored in a database, like in a sheet or table."
         ]
       },
       "acceptanceCriteria": [
-        "/gallery renders a list/grid of Gallery items retrieved from the backend and no longer uses the placeholder Array.from(...) items.",
-        "/activities renders a list/grid of Activities items retrieved from the backend and no longer uses the hardcoded placeholder array.",
-        "Both pages remain wrapped in RequireApproved.",
-        "If the backend returns zero items, each page shows an English empty-state message (e.g., \"No gallery items yet.\" / \"No activities yet.\").",
-        "If the backend is unavailable or the query fails, the page shows an English error state with a retry action (consistent with the app’s existing backend-unavailable patterns)."
+        "Backend page shows a table of persisted snapshot rows (not just the current live counts).",
+        "The page includes a \"Capture Snapshot\" action that adds a new row and updates the table.",
+        "The page includes row deletion and a \"Clear All\" action (with a confirmation step) and updates the table after changes.",
+        "All error/empty/loading states are in English; when there are no rows, an explicit empty state is shown (e.g., \"No snapshots yet\")."
       ]
     },
     {
-      "id": "REQ-34",
-      "text": "Add admin UI in the Admin Dashboard to manage Gallery and Acts & Activities content (create, edit, delete), using English user-facing text and respecting existing role/permission gating used by the Admin Dashboard.",
+      "id": "REQ-44",
+      "text": "Add React Query hooks (or extend existing hooks) to fetch and mutate backend status snapshots, following existing patterns in frontend/src/hooks (actor availability checks, no unauthenticated querying, and proper cache invalidation after mutations).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "recent-messages"
         ],
         "quotes": [
-          "there is no way to add in acts & activites & in gallary"
+          "I need the data to be stored in a database, like in a sheet or table."
         ]
       },
       "acceptanceCriteria": [
-        "Admin Dashboard provides a clear way for admins to add new Gallery items and Activities items.",
-        "Admin Dashboard provides a way for admins to edit and delete existing Gallery items and Activities items.",
-        "Admin content management UI is only accessible to admins (consistent with current admin gating behavior).",
-        "All admin forms validate required fields and display English inline errors or toast feedback on failure.",
-        "After creating/updating/deleting an item, the corresponding list updates without a full page refresh."
+        "Snapshot queries do not run unless an actor is available and the user is authenticated (consistent with useBackendSummary enabled logic).",
+        "After capturing/deleting/clearing snapshots, the snapshot list query is invalidated/refetched so the table updates without a full page reload.",
+        "Failure states surface a readable error message and allow retry (consistent with existing BackendPage error UI patterns)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor with logic in backend/main.mo (generate backend/migration.mo only if required by the conditional migration policy).",
-    "Do not edit files under frontend/src/components/ui (compose them instead).",
-    "Do not edit immutable frontend paths listed in SYSTEM_CONTEXT (use safe wrappers/components instead if changes are needed).",
-    "Use English for all user-facing UI text."
+    "Do not add or depend on any external database (e.g., Google Sheets, PostgreSQL, MongoDB); persistence must be inside the Motoko canister state.",
+    "Keep all Motoko logic in the single backend actor (backend/main.mo).",
+    "Do not edit files under frontend/src/components/ui or other paths listed in frontend.immutablePaths; compose existing UI components instead.",
+    "All user-facing text must be in English."
   ],
   "nonGoals": [
-    "Implementing image file uploads stored in-canister for Gallery items (only content management is required; image handling can be URL/text-based unless explicitly requested).",
-    "Adding real-time updates or WebSocket-based syncing.",
-    "Changing existing Directory/Events/Announcements/Profile behavior beyond what is required to integrate the new content management."
+    "Adding real-time updates/streaming logs on the Backend page.",
+    "Exporting snapshots to CSV/Excel or integrating with Google Sheets.",
+    "Introducing additional backend diagnostics beyond storing and displaying the requested table of status snapshots."
   ],
   "imageRequirements": {
     "required": [],

@@ -1,83 +1,38 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin-managed Gallery and Acts & Activities (frontend)",
+  "title": "Admin Backend page: persisted backend status snapshots table UI + React Query hooks",
   "requirements": [
     {
-      "id": "REQ-32",
-      "summary": "Add React Query hooks to list and admin-mutate Gallery and Activities content with auth/actor gating and cache invalidation.",
+      "id": "REQ-43",
+      "summary": "Update the admin-only Backend page to show persisted backend status snapshots in a table with capture/refresh/delete/clear controls",
       "acceptanceCriteria": [
-        "frontend/src/hooks/useQueries.ts includes hooks to list Gallery items and list Activities items.",
-        "frontend/src/hooks/useQueries.ts includes hooks for admin-only mutations to create/update/delete Gallery items and Activities items.",
-        "All new queries are disabled when the actor is not ready and do not run when the user is not authenticated (consistent with existing hooks that gate by identity).",
-        "Successful mutations invalidate the relevant list query keys so the pages refresh without manual reload."
+        "Backend page shows a table of persisted snapshot rows (not just the current live counts).",
+        "The page includes a \"Capture Snapshot\" action that adds a new row and updates the table.",
+        "The page includes row deletion and a \"Clear All\" action (with a confirmation step) and updates the table after changes.",
+        "All error/empty/loading states are in English; when there are no rows, an explicit empty state is shown (e.g., \"No snapshots yet\")."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/pages/BackendPage.tsx",
           "operation": "modify",
-          "description": "Add React Query hooks for Gallery and Activities using existing patterns: useInternetIdentity gating (no unauthenticated querying), actor availability checks, and list query invalidation on create/update/delete. Add list hooks for backend-driven reads (e.g., getGalleryImages/getActivities) and admin mutation hooks (create/update/delete) with query keys like ['galleryImages'] and ['activities']. Verify the component's usage instructions before implementing."
+          "description": "Replace the live-only status cards with an admin-only, sheet-like snapshots table view driven by the persisted snapshot APIs. Use the existing admin gating (AdminOnly) tied to the authorization component’s role checks (Verify the component's usage instructions before implementing). Add actions: Capture Snapshot (calls snapshot create mutation), Refresh (refetches snapshots query), Delete per row (calls delete mutation), and Clear All (calls clear mutation with an explicit confirmation step). Ensure English-only UI strings and include explicit loading, error (with retry), and empty states (e.g., \"No snapshots yet\")."
         }
       ]
     },
     {
-      "id": "REQ-33",
-      "summary": "Render Gallery and Activities pages from backend-driven content with RequireApproved gating, plus empty/error states and retry.",
+      "id": "REQ-44",
+      "summary": "Add React Query hooks to query and mutate backend status snapshots with actor/auth guards and cache invalidation",
       "acceptanceCriteria": [
-        "/gallery renders a list/grid of Gallery items retrieved from the backend and no longer uses the placeholder Array.from(...) items.",
-        "/activities renders a list/grid of Activities items retrieved from the backend and no longer uses the hardcoded placeholder array.",
-        "Both pages remain wrapped in RequireApproved.",
-        "If the backend returns zero items, each page shows an English empty-state message (e.g., \"No gallery items yet.\" / \"No activities yet.\").",
-        "If the backend is unavailable or the query fails, the page shows an English error state with a retry action (consistent with the app’s existing backend-unavailable patterns)."
+        "Snapshot queries do not run unless an actor is available and the user is authenticated (consistent with useBackendSummary enabled logic).",
+        "After capturing/deleting/clearing snapshots, the snapshot list query is invalidated/refetched so the table updates without a full page reload.",
+        "Failure states surface a readable error message and allow retry (consistent with existing BackendPage error UI patterns)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/GalleryPage.tsx",
-          "operation": "modify",
-          "description": "Replace placeholder gallery array with backend-driven query hook usage (from useQueries.ts) and follow existing loading/error patterns (e.g., BackendUnavailableCard with retry). Keep RequireApproved wrapper, render a grid/list of returned items, and show a clear English empty state when no items exist. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/ActivitiesPage.tsx",
-          "operation": "modify",
-          "description": "Replace hardcoded activities array with backend-driven query hook usage (from useQueries.ts) and follow existing loading/error patterns (e.g., BackendUnavailableCard with retry). Keep RequireApproved wrapper, render a grid/list of returned items, and show a clear English empty state when no items exist. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-34",
-      "summary": "Add admin dashboard UI to create/edit/delete Gallery and Activities items with validation, admin-only access, and live refresh via query invalidation.",
-      "acceptanceCriteria": [
-        "Admin Dashboard provides a clear way for admins to add new Gallery items and Activities items.",
-        "Admin Dashboard provides a way for admins to edit and delete existing Gallery items and Activities items.",
-        "Admin content management UI is only accessible to admins (consistent with current admin gating behavior).",
-        "All admin forms validate required fields and display English inline errors or toast feedback on failure.",
-        "After creating/updating/deleting an item, the corresponding list updates without a full page refresh."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/admin/GalleryAdminPanel.tsx",
+          "path": "frontend/src/hooks/useBackendSnapshots.ts",
           "operation": "create",
-          "description": "Create an admin panel to manage Gallery items: list existing items, provide actions to add/edit/delete, and connect to the new Gallery query/mutation hooks. Use the app’s existing authorization-driven admin gating via AdminDashboardPage/useAccess (authorization component capability: role-based admin access). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/GalleryEditorDialog.tsx",
-          "operation": "create",
-          "description": "Create a dialog-based form for Gallery create/edit (and a delete confirmation flow) using existing shadcn/ui building blocks and sonner toasts for English success/failure feedback. Validate required fields (e.g., title, image URL) before mutation submission. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
-          "operation": "create",
-          "description": "Create an admin panel to manage Activities items: list existing items, provide actions to add/edit/delete, and connect to the new Activities query/mutation hooks. Use the app’s existing authorization-driven admin gating via AdminDashboardPage/useAccess (authorization component capability: role-based admin access). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/ActivityEditorDialog.tsx",
-          "operation": "create",
-          "description": "Create a dialog-based form for Activities create/edit (and a delete confirmation flow) using existing shadcn/ui building blocks and sonner toasts for English success/failure feedback. Validate required fields (e.g., title, description; optional photo URLs list) before mutation submission. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Wire the new Gallery and Activities admin panels into the existing Admin Dashboard 'Content' tab (alongside Announcement Management) using the same admin-only gating already enforced by useAccess/isAdmin. Ensure the new panels are reachable and not orphaned, and that list refresh happens via React Query invalidation after mutations. Verify the component's usage instructions before implementing."
+          "description": "Create dedicated React Query hooks for persisted backend snapshots: a list query hook (newest-first ordering assumed from backend) and mutation hooks for capture/create, delete-by-id, and clear-all. Follow existing patterns used by useBackendSummary/useQueries: (1) guard queries with actor availability and authentication (via useActor + useInternetIdentity), (2) throw readable errors when actor is unavailable in mutations, and (3) invalidate/refetch the snapshots list query key after successful mutations. Use existing authorization-driven admin-only access behavior in the UI layer (Verify the component's usage instructions before implementing)."
         }
       ]
     }

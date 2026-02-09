@@ -1,13 +1,13 @@
 {
-  "frontend/src/App.tsx": "Main application component with TanStack Router setup including all routes (landing, directory, events, announcements, my-profile, admin, gallery, activities) with theme provider and toast notifications.",
+  "frontend/src/App.tsx": "Main application component with TanStack Router setup including all routes (landing, directory, events, announcements, my-profile, admin, gallery, activities, backend) with theme provider and toast notifications.",
   "frontend/src/components/AppLayout.tsx": "Shared layout wrapper component that provides consistent structure with header, main content area, and footer across all pages.",
-  "frontend/src/components/AppHeader.tsx": "Responsive header component with navigation links, authentication state display, and admin navigation using direct useIsAdmin hook instead of useAccess to avoid unnecessary loading dependencies.",
+  "frontend/src/components/AppHeader.tsx": "Responsive header component with navigation links, authentication state display, and admin/backend navigation (both visible only to admins) in desktop and mobile menus.",
   "frontend/src/components/AppFooter.tsx": "Footer component with copyright notice, caffeine.ai attribution link, and build version label.",
   "frontend/src/components/AuthButton.tsx": "Authentication button component that handles Internet Identity sign-in/sign-out with loading states and error handling.",
   "frontend/src/components/RequireAuth.tsx": "Higher-order component that guards routes/features requiring authentication and shows sign-in prompt for unauthenticated users.",
-  "frontend/src/components/AdminOnly.tsx": "Higher-order component that conditionally renders admin-only features based on user role with access denied fallback.",
+  "frontend/src/components/AdminOnly.tsx": "Higher-order component that conditionally renders admin-only features based on user role (including super-admin check) with access denied fallback.",
   "frontend/src/hooks/useCurrentUser.ts": "Custom hook providing current user authentication state and profile information, with loading state only active during Internet Identity initialization or when authenticated user's profile is loading.",
-  "frontend/src/hooks/useIsAdmin.ts": "Custom hook that queries admin status from backend, gated to only run when authenticated, with exposed error state and refetch for retry functionality.",
+  "frontend/src/hooks/useIsAdmin.ts": "Custom hook that queries admin status from backend and checks super-admin allowlist, treating allowlisted principals as admin without backend verification while still running the query for consistency.",
   "frontend/src/hooks/useQueries.ts": "Centralized React Query hooks for all backend operations including new Gallery and Activities hooks (useGetGalleryImages, useCreateGalleryImage, useUpdateGalleryImage, useDeleteGalleryImage, useGetActivities, useCreateActivity, useUpdateActivity, useDeleteActivity) with proper authentication gating and cache invalidation.",
   "frontend/src/pages/LandingPage.tsx": "Public landing page with hero section and feature cards that renders immediately without any backend query dependencies, using only Internet Identity state for authentication display.",
   "frontend/src/pages/MyProfilePage.tsx": "Profile creation/editing page wrapped with RequireApproved, now with backend status checking and error handling to prevent infinite loading and provide retry functionality for failed queries.",
@@ -39,5 +39,9 @@
   "frontend/src/components/admin/GalleryAdminPanel.tsx": "Admin panel component for managing gallery images with list view, create/edit/delete actions, and integration with Gallery query/mutation hooks.",
   "frontend/src/components/admin/GalleryEditorDialog.tsx": "Dialog-based form component for creating, editing, and deleting gallery images with validation, error handling, and toast notifications.",
   "frontend/src/components/admin/ActivitiesAdminPanel.tsx": "Admin panel component for managing activities with list view, create/edit/delete actions, and integration with Activities query/mutation hooks.",
-  "frontend/src/components/admin/ActivityEditorDialog.tsx": "Dialog-based form component for creating, editing, and deleting activities with support for multiple photo URLs, validation, error handling, and toast notifications."
+  "frontend/src/components/admin/ActivityEditorDialog.tsx": "Dialog-based form component for creating, editing, and deleting activities with support for multiple photo URLs, validation, error handling, and toast notifications.",
+  "frontend/src/config/superAdmins.ts": "Configuration module that defines a super-admin allowlist based on Internet Identity principals, with helper functions to check if a principal is a super-admin (note: requires manual principal addition after login, as email addresses do not map to principals).",
+  "frontend/src/hooks/useBackendSummary.ts": "Custom React Query hook that fetches backend system status/statistics from the canister, gated to only run when authenticated with retry logic.",
+  "frontend/src/pages/BackendPage.tsx": "Admin-only page displaying persisted backend status snapshots in a table with capture, refresh, delete per row, and clear all actions with confirmation dialogs and proper loading/error/empty states.",
+  "frontend/src/hooks/useBackendSnapshots.ts": "Custom React Query hooks for managing backend status snapshots including list query and mutations for create, delete, and clear-all operations with proper authentication gating and cache invalidation."
 }

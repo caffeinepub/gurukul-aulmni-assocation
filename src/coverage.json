@@ -1,93 +1,73 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T14:11:46.774Z",
+  "generatedAt": "2026-02-09T15:07:57.271Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 5,
-    "implemented": 3,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-30",
-        "summary": "Add backend data models and APIs to support admin-managed content for the Gallery and Acts & Activities sections, including admin-only create/update/delete operations and approved-member read/list operations.",
+        "id": "REQ-40",
+        "summary": "Add a persistent, database-like backend data model to store Backend page status snapshots (a \"sheet/table\" of rows) inside the Motoko canister state, where each row includes a unique id, a capturedAt timestamp, and the same count fields currently returned by getBackendStatus (profiles, events, announcements, gallery images, activities, approved users, pending users). Access must be admin-only.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-31",
-        "summary": "Ensure the new Gallery/Activities backend state is upgrade-safe and does not erase existing deployed state (profiles, events, announcements, approvals, and authorization data) when the canister is upgraded.",
+        "id": "REQ-41",
+        "summary": "Implement backend APIs to manage the stored backend status snapshots so the data can be viewed and managed as a table: (1) create/capture a new snapshot row, (2) list snapshot rows (most recent first), and (3) delete a snapshot row and/or clear all snapshots.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-32",
-        "summary": "Add React Query hooks for listing and mutating Gallery and Acts & Activities content, following the existing patterns in frontend/src/hooks/useQueries.ts (actor availability checks, cache invalidation, and no unauthenticated querying).",
+        "id": "REQ-42",
+        "summary": "Ensure the new backend snapshot storage is upgrade-safe and does not erase any existing deployed state (profiles, events, announcements, approvals, authorization data). Add conditional upgrade/migration handling only if required by the current persistence approach.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-43",
+        "summary": "Update the existing admin-only Backend page (frontend/src/pages/BackendPage.tsx) to display the stored backend status snapshots in a clear table (sheet-like) view, including captured timestamp and all count columns, and provide controls to: (1) capture a new snapshot row, (2) refresh the table, and (3) delete a row and/or clear all rows. Use English user-facing text.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/pages/BackendPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/pages/BackendPage.tsx"
         ]
       },
       {
-        "id": "REQ-33",
-        "summary": "Update the Gallery page (/gallery) and Acts & Activities page (/activities) to display backend-driven content (instead of placeholder arrays), while preserving the existing RequireApproved gating and showing a clear empty-state message when no items exist.",
+        "id": "REQ-44",
+        "summary": "Add React Query hooks (or extend existing hooks) to fetch and mutate backend status snapshots, following existing patterns in frontend/src/hooks (actor availability checks, no unauthenticated querying, and proper cache invalidation after mutations).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/GalleryPage.tsx",
-          "frontend/src/pages/ActivitiesPage.tsx"
+          "frontend/src/hooks/useBackendSnapshots.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/GalleryPage.tsx",
-          "frontend/src/pages/ActivitiesPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-34",
-        "summary": "Add admin UI in the Admin Dashboard to manage Gallery and Acts & Activities content (create, edit, delete), using English user-facing text and respecting existing role/permission gating used by the Admin Dashboard.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/admin/GalleryAdminPanel.tsx",
-          "frontend/src/components/admin/GalleryEditorDialog.tsx",
-          "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
-          "frontend/src/components/admin/ActivityEditorDialog.tsx",
-          "frontend/src/pages/AdminDashboardPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/admin/GalleryAdminPanel.tsx",
-          "frontend/src/components/admin/GalleryEditorDialog.tsx",
-          "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
-          "frontend/src/components/admin/ActivityEditorDialog.tsx",
-          "frontend/src/pages/AdminDashboardPage.tsx"
+          "frontend/src/hooks/useBackendSnapshots.ts"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
-    "frontend/src/components/admin/ActivityEditorDialog.tsx",
-    "frontend/src/components/admin/GalleryAdminPanel.tsx",
-    "frontend/src/components/admin/GalleryEditorDialog.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/ActivitiesPage.tsx",
-    "frontend/src/pages/AdminDashboardPage.tsx",
-    "frontend/src/pages/GalleryPage.tsx",
+    "frontend/src/hooks/useBackendSnapshots.ts",
+    "frontend/src/pages/BackendPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

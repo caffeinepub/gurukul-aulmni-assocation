@@ -6,20 +6,17 @@ import Array "mo:core/Array";
 import Order "mo:core/Order";
 import Iter "mo:core/Iter";
 import Nat64 "mo:core/Nat64";
+import Nat "mo:core/Nat";
+import Text "mo:core/Text";
+import Int64 "mo:core/Int64";
+import Int "mo:core/Int";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import UserApproval "user-approval/approval";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
-  let accessControlState = AccessControl.initState();
-  include MixinAuthorization(accessControlState);
-
-  let approvalState = UserApproval.initState(accessControlState);
-
   type AlumniProfile = {
     fullName : Text;
     graduationYear : Nat16;
@@ -57,7 +54,6 @@ actor {
     content : Text;
   };
 
-  // Gallery and Acts & Activities types
   type GalleryImage = {
     id : Nat64;
     imageUrl : Text;
@@ -86,6 +82,18 @@ actor {
     photos : [Text];
   };
 
+  type DirectoryEntry = (Nat16, Text);
+
+  public type BackendStatus = {
+    totalAlumniProfiles : Nat;
+    totalEvents : Nat;
+    totalAnnouncements : Nat;
+    totalGalleryImages : Nat;
+    totalActivities : Nat;
+    totalApprovedUsers : Nat;
+    totalPendingUsers : Nat;
+  };
+
   module Event {
     public func compare(a : Event, b : Event) : Order.Order {
       Nat64.compare(a.id, b.id);
@@ -110,6 +118,24 @@ actor {
     };
   };
 
+  type BackendSnapshot = {
+    id : Nat;
+    capturedAt : Int;
+    totalAlumniProfiles : Nat;
+    totalEvents : Nat;
+    totalAnnouncements : Nat;
+    totalGalleryImages : Nat;
+    totalActivities : Nat;
+    totalApprovedUsers : Nat;
+    totalPendingUsers : Nat;
+  };
+
+  // --- Persistent State ---
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
+
+  let approvalState = UserApproval.initState(accessControlState);
+
   let alumniProfiles = Map.empty<Principal, AlumniProfile>();
   let eventEntries = Map.empty<Nat64, Event>();
   let announcementEntries = Map.empty<Nat64, Announcement>();
@@ -121,37 +147,46 @@ actor {
   var nextGalleryImageId = 0 : Nat64;
   var nextActivityId = 0 : Nat64;
 
-  func extractDirectoryEntry(profile : AlumniProfile) : (Nat16, Text) {
+  var nextSnapshotId = 0;
+  let backendSnapshots = Map.empty<Nat, BackendSnapshot>();
+
+  func extractDirectoryEntry(profile : AlumniProfile) : DirectoryEntry {
     (profile.graduationYear, profile.department);
   };
 
-  // Helper function to check if caller is approved (admin or approved user)
   func isCallerApprovedOrAdmin(caller : Principal) : Bool {
     AccessControl.hasPermission(accessControlState, caller, #admin) or UserApproval.isApproved(approvalState, caller);
   };
 
+  // --- Guard Functions ---
+  func adminGuard(caller : Principal) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Admins only");
+    };
+  };
+
+  func userGuard(caller : Principal) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Users only");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: Approvals only");
+    };
+  };
+
+  // --- Auth/Approval API ---
   public query ({ caller }) func isCallerApproved() : async Bool {
     isCallerApprovedOrAdmin(caller);
   };
 
-  // Profile functions - require user role AND approval (or admin)
+  // --- Profile Functions ---
   public query ({ caller }) func getCallerUserProfile() : async ?AlumniProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to access profiles");
-    };
+    userGuard(caller);
     alumniProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?AlumniProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to access profiles");
-    };
+    userGuard(caller);
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
@@ -159,78 +194,43 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : AlumniProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to save profiles");
-    };
+    userGuard(caller);
     alumniProfiles.add(caller, profile);
   };
 
   public shared ({ caller }) func saveAlumniProfile(profile : AlumniProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to save profiles");
-    };
+    userGuard(caller);
     alumniProfiles.add(caller, profile);
   };
 
   public query ({ caller }) func getAlumniProfile(user : Principal) : async ?AlumniProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to access profiles");
-    };
+    userGuard(caller);
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
     alumniProfiles.get(user);
   };
 
-  // Directory functions - require user role AND approval (or admin)
   public query ({ caller }) func getGraduationYears() : async [Nat16] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access directory");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to access directory");
-    };
+    userGuard(caller);
     let yearsSet = Set.empty<Nat16>();
-
     for ((_, profile) in alumniProfiles.entries()) {
       yearsSet.add(profile.graduationYear);
     };
-
     yearsSet.toArray();
   };
 
   public query ({ caller }) func getDepartments() : async [Text] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access directory");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to access directory");
-    };
+    userGuard(caller);
     let departmentSet = Set.empty<Text>();
-
     for ((_, profile) in alumniProfiles.entries()) {
       departmentSet.add(profile.department);
     };
-
     departmentSet.toArray();
   };
 
   public query ({ caller }) func searchAlumniProfiles(filterYear : ?Nat16, filterDepartment : ?Text) : async [AlumniProfile] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can search directory");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to search directory");
-    };
+    userGuard(caller);
     let filteredProfiles = alumniProfiles.values().toArray().filter(
       func(profile) {
         let yearMatch = switch (filterYear) {
@@ -246,15 +246,12 @@ actor {
         yearMatch and deptMatch;
       }
     );
-
     filteredProfiles;
   };
 
-  // Event management - admin only for create/update/delete
+  // --- Event Management ---
   public shared ({ caller }) func createEvent(event : EditableEvent) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     let curId = nextEventId;
     let newEvent : Event = {
       id = curId;
@@ -263,15 +260,12 @@ actor {
       location = event.location;
       description = event.description;
     };
-
     eventEntries.add(curId, newEvent);
     nextEventId += 1;
   };
 
   public shared ({ caller }) func updateEvent(id : Nat64, updatedEvent : EditableEvent) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     switch (eventEntries.get(id)) {
       case (null) {
         Runtime.trap("Event does not exist");
@@ -290,9 +284,7 @@ actor {
   };
 
   public shared ({ caller }) func deleteEvent(id : Nat64) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     switch (eventEntries.get(id)) {
       case (null) {
         Runtime.trap("Event does not exist");
@@ -303,16 +295,9 @@ actor {
     };
   };
 
-  // Event viewing - require user role AND approval (or admin)
   public query ({ caller }) func getEvents(byPast : ?Bool) : async [Event] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view events");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to view events");
-    };
+    userGuard(caller);
     let allEvents = eventEntries.values().toArray();
-
     switch (byPast) {
       case (null) { allEvents };
       case (?true) {
@@ -324,11 +309,9 @@ actor {
     };
   };
 
-  // Announcement management - admin only for create/delete
+  // --- Announcement Management ---
   public shared ({ caller }) func createAnnouncement(announcement : EditableAnnouncement) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     let curId = nextAnnouncementId;
     let newAnnouncement : Announcement = {
       id = curId;
@@ -336,15 +319,12 @@ actor {
       timestampNanos = Time.now();
       content = announcement.content;
     };
-
     announcementEntries.add(curId, newAnnouncement);
     nextAnnouncementId += 1;
   };
 
   public shared ({ caller }) func deleteAnnouncement(id : Nat64) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     switch (announcementEntries.get(id)) {
       case (null) {
         Runtime.trap("Announcement does not exist");
@@ -355,14 +335,8 @@ actor {
     };
   };
 
-  // Announcement viewing - require user role AND approval (or admin)
   public query ({ caller }) func getAnnouncements() : async [Announcement] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view announcements");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to view announcements");
-    };
+    userGuard(caller);
     announcementEntries.values().toArray();
   };
 
@@ -385,28 +359,19 @@ actor {
   };
 
   public query ({ caller }) func getAnnouncementsByYearRange(startYear : ?Int16, endYear : ?Int16) : async [Announcement] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view announcements");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to view announcements");
-    };
+    userGuard(caller);
     let allAnnouncements = announcementEntries.values().toArray();
-
     let allFiltered = filterByDateRange(
       allAnnouncements,
       null,
       null,
     );
-
     allFiltered;
   };
 
-  // Gallery management - admin only for create/update/delete
+  // --- Gallery Management ---
   public shared ({ caller }) func createGalleryImage(image : EditableGalleryImage) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     let curId = nextGalleryImageId;
     let newImage : GalleryImage = {
       id = curId;
@@ -415,15 +380,12 @@ actor {
       description = image.description;
       timestampNanos = Time.now();
     };
-
     galleryImages.add(curId, newImage);
     nextGalleryImageId += 1;
   };
 
   public shared ({ caller }) func updateGalleryImage(id : Nat64, updatedImage : EditableGalleryImage) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     switch (galleryImages.get(id)) {
       case (null) {
         Runtime.trap("Gallery image does not exist");
@@ -442,9 +404,7 @@ actor {
   };
 
   public shared ({ caller }) func deleteGalleryImage(id : Nat64) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     switch (galleryImages.get(id)) {
       case (null) {
         Runtime.trap("Gallery image does not exist");
@@ -456,20 +416,13 @@ actor {
   };
 
   public query ({ caller }) func getGalleryImages() : async [GalleryImage] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view gallery images");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to view gallery images");
-    };
+    userGuard(caller);
     galleryImages.values().toArray();
   };
 
-  // Acts & Activities management - admin only for create/update/delete
+  // --- Activities Management ---
   public shared ({ caller }) func createActivity(activity : EditableActivity) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     let curId = nextActivityId;
     let newActivity : Activity = {
       id = curId;
@@ -478,15 +431,12 @@ actor {
       timestampNanos = Time.now();
       photos = activity.photos;
     };
-
     activities.add(curId, newActivity);
     nextActivityId += 1;
   };
 
   public shared ({ caller }) func updateActivity(id : Nat64, updatedActivity : EditableActivity) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     switch (activities.get(id)) {
       case (null) {
         Runtime.trap("Activity does not exist");
@@ -505,9 +455,7 @@ actor {
   };
 
   public shared ({ caller }) func deleteActivity(id : Nat64) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     switch (activities.get(id)) {
       case (null) {
         Runtime.trap("Activity does not exist");
@@ -519,32 +467,22 @@ actor {
   };
 
   public query ({ caller }) func getActivities() : async [Activity] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view activities");
-    };
-    if (not isCallerApprovedOrAdmin(caller)) {
-      Runtime.trap("Unauthorized: User must be approved to view activities");
-    };
+    userGuard(caller);
     activities.values().toArray();
   };
 
+  // --- Approval API ---
   public shared ({ caller }) func requestApproval() : async () {
     UserApproval.requestApproval(approvalState, caller);
   };
 
   public shared ({ caller }) func setApproval(user : Principal, status : UserApproval.ApprovalStatus) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     UserApproval.setApproval(approvalState, user, status);
   };
 
-  // Approval API: only returns approval state now
   public query ({ caller }) func listApprovalStates() : async [(Principal, UserApproval.ApprovalStatus)] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
-
+    adminGuard(caller);
     let approvals : [(Principal, UserApproval.ApprovalStatus)] = UserApproval.listApprovals(approvalState).map(
       func(info) { (info.principal, info.status) }
     );
@@ -552,10 +490,7 @@ actor {
   };
 
   public query ({ caller }) func listApprovalStatesWithProfiles() : async [(Principal, UserApproval.ApprovalStatus, ?AlumniProfile)] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
-
+    adminGuard(caller);
     UserApproval.listApprovals(approvalState).map(
       func(info) {
         (info.principal, info.status, alumniProfiles.get(info.principal));
@@ -564,9 +499,86 @@ actor {
   };
 
   public query ({ caller }) func listApprovals() : async [UserApproval.UserApprovalInfo] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
-    };
+    adminGuard(caller);
     UserApproval.listApprovals(approvalState);
+  };
+
+  // --- Backend Diagnostics API (Admin Only) ---
+  public query ({ caller }) func getBackendStatus() : async BackendStatus {
+    adminGuard(caller);
+    {
+      totalAlumniProfiles = alumniProfiles.size();
+      totalEvents = eventEntries.size();
+      totalAnnouncements = announcementEntries.size();
+      totalGalleryImages = galleryImages.size();
+      totalActivities = activities.size();
+      totalApprovedUsers = countApprovedUsers();
+      totalPendingUsers = countPendingUsers();
+    };
+  };
+
+  // Backend status snapshot functions
+  public shared ({ caller }) func createBackendSnapshot() : async Nat {
+    adminGuard(caller);
+    let snapshotId = nextSnapshotId;
+    nextSnapshotId += 1;
+
+    let snapshot : BackendSnapshot = {
+      id = snapshotId;
+      capturedAt = Time.now();
+      totalAlumniProfiles = alumniProfiles.size();
+      totalEvents = eventEntries.size();
+      totalAnnouncements = announcementEntries.size();
+      totalGalleryImages = galleryImages.size();
+      totalActivities = activities.size();
+      totalApprovedUsers = countApprovedUsers();
+      totalPendingUsers = countPendingUsers();
+    };
+
+    backendSnapshots.add(snapshotId, snapshot);
+    snapshotId;
+  };
+
+  public query ({ caller }) func listBackendSnapshots() : async [BackendSnapshot] {
+    adminGuard(caller);
+    backendSnapshots.values().toArray().reverse();
+  };
+
+  public shared ({ caller }) func deleteBackendSnapshot(id : Nat) : async Bool {
+    adminGuard(caller);
+    switch (backendSnapshots.get(id)) {
+      case (null) { false };
+      case (?_) {
+        backendSnapshots.remove(id);
+        true;
+      };
+    };
+  };
+
+  public shared ({ caller }) func clearAllBackendSnapshots() : async () {
+    adminGuard(caller);
+    backendSnapshots.clear();
+  };
+
+  private func countApprovedUsers() : Nat {
+    var count = 0;
+    for (user in UserApproval.listApprovals(approvalState).values()) {
+      switch (user.status) {
+        case (#approved) { count += 1 };
+        case (_) {};
+      };
+    };
+    count;
+  };
+
+  private func countPendingUsers() : Nat {
+    var count = 0;
+    for (user in UserApproval.listApprovals(approvalState).values()) {
+      switch (user.status) {
+        case (#pending) { count += 1 };
+        case (_) {};
+      };
+    };
+    count;
   };
 };

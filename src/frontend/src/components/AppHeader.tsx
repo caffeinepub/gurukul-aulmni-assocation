@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { Menu, GraduationCap, Shield } from 'lucide-react';
+import { Menu, GraduationCap, Shield, Database } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -48,14 +48,24 @@ export default function AppHeader() {
               </Button>
             ))}
             {isAuthenticated && isAdmin && (
-              <Button
-                variant="ghost"
-                onClick={() => navigate({ to: '/admin' })}
-                className="text-sm font-medium"
-              >
-                <Shield className="mr-2 h-4 w-4" />
-                Admin
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate({ to: '/admin' })}
+                  className="text-sm font-medium"
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Admin
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate({ to: '/backend' })}
+                  className="text-sm font-medium"
+                >
+                  <Database className="mr-2 h-4 w-4" />
+                  Backend
+                </Button>
+              </>
             )}
           </nav>
         </div>
@@ -106,17 +116,30 @@ export default function AppHeader() {
                   </Button>
                 ))}
                 {isAuthenticated && isAdmin && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      navigate({ to: '/admin' });
-                      setMobileMenuOpen(false);
-                    }}
-                    className="justify-start"
-                  >
-                    <Shield className="mr-2 h-4 w-4" />
-                    Admin
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        navigate({ to: '/admin' });
+                        setMobileMenuOpen(false);
+                      }}
+                      className="justify-start"
+                    >
+                      <Shield className="mr-2 h-4 w-4" />
+                      Admin
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        navigate({ to: '/backend' });
+                        setMobileMenuOpen(false);
+                      }}
+                      className="justify-start"
+                    >
+                      <Database className="mr-2 h-4 w-4" />
+                      Backend
+                    </Button>
+                  </>
                 )}
               </div>
             </SheetContent>

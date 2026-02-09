@@ -35,6 +35,26 @@ export interface Announcement {
 export type ApprovalStatus = { 'pending' : null } |
   { 'approved' : null } |
   { 'rejected' : null };
+export interface BackendSnapshot {
+  'id' : bigint,
+  'totalActivities' : bigint,
+  'totalAnnouncements' : bigint,
+  'totalGalleryImages' : bigint,
+  'totalEvents' : bigint,
+  'totalPendingUsers' : bigint,
+  'totalAlumniProfiles' : bigint,
+  'capturedAt' : bigint,
+  'totalApprovedUsers' : bigint,
+}
+export interface BackendStatus {
+  'totalActivities' : bigint,
+  'totalAnnouncements' : bigint,
+  'totalGalleryImages' : bigint,
+  'totalEvents' : bigint,
+  'totalPendingUsers' : bigint,
+  'totalAlumniProfiles' : bigint,
+  'totalApprovedUsers' : bigint,
+}
 export interface EditableActivity {
   'title' : string,
   'description' : string,
@@ -76,12 +96,15 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'clearAllBackendSnapshots' : ActorMethod<[], undefined>,
   'createActivity' : ActorMethod<[EditableActivity], undefined>,
   'createAnnouncement' : ActorMethod<[EditableAnnouncement], undefined>,
+  'createBackendSnapshot' : ActorMethod<[], bigint>,
   'createEvent' : ActorMethod<[EditableEvent], undefined>,
   'createGalleryImage' : ActorMethod<[EditableGalleryImage], undefined>,
   'deleteActivity' : ActorMethod<[bigint], undefined>,
   'deleteAnnouncement' : ActorMethod<[bigint], undefined>,
+  'deleteBackendSnapshot' : ActorMethod<[bigint], boolean>,
   'deleteEvent' : ActorMethod<[bigint], undefined>,
   'deleteGalleryImage' : ActorMethod<[bigint], undefined>,
   'getActivities' : ActorMethod<[], Array<Activity>>,
@@ -91,6 +114,7 @@ export interface _SERVICE {
     [[] | [number], [] | [number]],
     Array<Announcement>
   >,
+  'getBackendStatus' : ActorMethod<[], BackendStatus>,
   'getCallerUserProfile' : ActorMethod<[], [] | [AlumniProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getDepartments' : ActorMethod<[], Array<string>>,
@@ -106,6 +130,7 @@ export interface _SERVICE {
     Array<[Principal, ApprovalStatus, [] | [AlumniProfile]]>
   >,
   'listApprovals' : ActorMethod<[], Array<UserApprovalInfo>>,
+  'listBackendSnapshots' : ActorMethod<[], Array<BackendSnapshot>>,
   'requestApproval' : ActorMethod<[], undefined>,
   'saveAlumniProfile' : ActorMethod<[AlumniProfile], undefined>,
   'saveCallerUserProfile' : ActorMethod<[AlumniProfile], undefined>,

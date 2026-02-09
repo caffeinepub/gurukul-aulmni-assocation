@@ -16,14 +16,41 @@ export interface AlumniProfile {
     currentCity: string;
     department: string;
 }
-export interface UserApprovalInfo {
-    status: ApprovalStatus;
-    principal: Principal;
-}
 export interface EditableActivity {
     title: string;
     description: string;
     photos: Array<string>;
+}
+export interface BackendStatus {
+    totalActivities: bigint;
+    totalAnnouncements: bigint;
+    totalGalleryImages: bigint;
+    totalEvents: bigint;
+    totalPendingUsers: bigint;
+    totalAlumniProfiles: bigint;
+    totalApprovedUsers: bigint;
+}
+export interface BackendSnapshot {
+    id: bigint;
+    totalActivities: bigint;
+    totalAnnouncements: bigint;
+    totalGalleryImages: bigint;
+    totalEvents: bigint;
+    totalPendingUsers: bigint;
+    totalAlumniProfiles: bigint;
+    capturedAt: bigint;
+    totalApprovedUsers: bigint;
+}
+export interface Event {
+    id: bigint;
+    title: string;
+    description: string;
+    location: string;
+    timestampNanos: bigint;
+}
+export interface UserApprovalInfo {
+    status: ApprovalStatus;
+    principal: Principal;
 }
 export interface Activity {
     id: bigint;
@@ -40,13 +67,6 @@ export interface GalleryImage {
     timestampNanos: bigint;
 }
 export interface EditableEvent {
-    title: string;
-    description: string;
-    location: string;
-    timestampNanos: bigint;
-}
-export interface Event {
-    id: bigint;
     title: string;
     description: string;
     location: string;
@@ -79,18 +99,22 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    clearAllBackendSnapshots(): Promise<void>;
     createActivity(activity: EditableActivity): Promise<void>;
     createAnnouncement(announcement: EditableAnnouncement): Promise<void>;
+    createBackendSnapshot(): Promise<bigint>;
     createEvent(event: EditableEvent): Promise<void>;
     createGalleryImage(image: EditableGalleryImage): Promise<void>;
     deleteActivity(id: bigint): Promise<void>;
     deleteAnnouncement(id: bigint): Promise<void>;
+    deleteBackendSnapshot(id: bigint): Promise<boolean>;
     deleteEvent(id: bigint): Promise<void>;
     deleteGalleryImage(id: bigint): Promise<void>;
     getActivities(): Promise<Array<Activity>>;
     getAlumniProfile(user: Principal): Promise<AlumniProfile | null>;
     getAnnouncements(): Promise<Array<Announcement>>;
     getAnnouncementsByYearRange(startYear: number | null, endYear: number | null): Promise<Array<Announcement>>;
+    getBackendStatus(): Promise<BackendStatus>;
     getCallerUserProfile(): Promise<AlumniProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getDepartments(): Promise<Array<string>>;
@@ -103,6 +127,7 @@ export interface backendInterface {
     listApprovalStates(): Promise<Array<[Principal, ApprovalStatus]>>;
     listApprovalStatesWithProfiles(): Promise<Array<[Principal, ApprovalStatus, AlumniProfile | null]>>;
     listApprovals(): Promise<Array<UserApprovalInfo>>;
+    listBackendSnapshots(): Promise<Array<BackendSnapshot>>;
     requestApproval(): Promise<void>;
     saveAlumniProfile(profile: AlumniProfile): Promise<void>;
     saveCallerUserProfile(profile: AlumniProfile): Promise<void>;

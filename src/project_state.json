@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
+  "projectStateVersion": 21,
   "summary": "Build an app for an alumni association named \"Gurukul Aulmni Assocation\", including role-based administration, content/member management, and approved-member-only access.",
   "architectural_notes": [
     "Add role-based access control (RBAC) beyond a single admin list; define roles/permissions for content (posts/announcements) and member management actions.",
@@ -8,14 +8,17 @@
     "Add support for user-uploaded profile pictures (storage, URLs, privacy: visible to all) with a placeholder fallback.",
     "Add data model + admin CRUD for Executive Committee entries, including historical/past committees.",
     "Add content models/pages for Gallery and Acts & Activities (likely admin-managed).",
-    "Provide admin-managed content models + CRUD UI for Gallery items and Acts & Activities entries (not just static pages)."
+    "Provide admin-managed content models + CRUD UI for Gallery items and Acts & Activities entries (not just static pages).",
+    "Add an admin-only \"Backend\" diagnostics page; define what backend information is safe to expose and ensure it is protected by RBAC/super-admin access.",
+    "Support a bootstrap/super-admin mechanism (e.g., hardcoded or config-based allowlist) to always grant admin privileges to a specific email identity (chresthaxakxham@gmail.com), in addition to existing admin management.",
+    "Backend page should read from persistent canister state (database-like tables) for any backend info that must be stored long-term, not only computed at request time."
   ],
   "known_issues": [
     "Admin Dashboard page is stuck on loading / not rendering, while other pages load correctly.",
     "Admin page appears unchanged/old after deployment; expected new admin features/updates are not reflected (possible caching or deployment/versioning issue).",
     "Gallery and Acts & Activities currently have no way for admins to add/manage content (missing admin content management UI/API)."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-create-a-responsive-public-landing-page-for-gurukul-aulmni-assocation-that-introduces-the-association-and-provides-clear-calls-to-action-to-sign-in-and-explore-the-app",
@@ -232,6 +235,54 @@
         "REQ-34"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-create-a-new-admin-only-frontend-page-route-e-g-backend-that-displays-backend-system-information-in-english-so-an-admin-can-see-all-the-info-of-backend-from-within-the-app-ui",
+      "title": "Create a new admin-only frontend page/route (e.g., \"/backend\") that displays backend/system information in English, so an admin can \"see all the info of backend\" from within the app UI.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wire-the-new-backend-page-ui-to-the-new-backend-summary-api-using-react-query-following-existing-hook-patterns-and-present-the-returned-data-in-a-readable-admin-friendly-layout",
+      "title": "Wire the new Backend page UI to the new backend summary API using React Query (following existing hook patterns), and present the returned data in a readable, admin-friendly layout.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-top-navigation-desktop-and-mobile-to-include-a-clearly-labeled-backend-navigation-item-that-appears-only-when-the-signed-in-user-has-admin-permissions-consistent-with-existing-navigation-behavior",
+      "title": "Update the top navigation (desktop and mobile) to include a clearly labeled \"Backend\" navigation item that appears only when the signed-in user has admin permissions, consistent with existing navigation behavior.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-permanent-super-admin-allowlist-so-that-the-internet-identity-account-associated-with-chresthaxakxham-gmail-com-always-has-admin-access-and-therefore-always-can-access-both-the-admin-dashboard-and-the-new-backend-page",
+      "title": "Implement a permanent super-admin allowlist so that the Internet Identity account associated with \"chresthaxakxham@gmail.com\" always has admin access (and therefore always can access both the Admin Dashboard and the new Backend page).",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-existing-admin-only-backend-page-frontend-src-pages-backendpage-tsx-to-display-the-stored-backend-status-snapshots-in-a-clear-table-sheet-like-view-including-captured-timestamp-and-all-count-columns-and-provide-controls-to-1-capture-a-new-snapshot-row-2-refresh-the-table-and-3-delete-a-row-and-or-clear-all-rows-use-english-user-facing-text",
+      "title": "Update the existing admin-only Backend page (frontend/src/pages/BackendPage.tsx) to display the stored backend status snapshots in a clear table (sheet-like) view, including captured timestamp and all count columns, and provide controls to: (1) capture a new snapshot row, (2) refresh the table, and (3) delete a row and/or clear all rows. Use English user-facing text.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-react-query-hooks-or-extend-existing-hooks-to-fetch-and-mutate-backend-status-snapshots-following-existing-patterns-in-frontend-src-hooks-actor-availability-checks-no-unauthenticated-querying-and-proper-cache-invalidation-after-mutations",
+      "title": "Add React Query hooks (or extend existing hooks) to fetch and mutate backend status snapshots, following existing patterns in frontend/src/hooks (actor availability checks, no unauthenticated querying, and proper cache invalidation after mutations).",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -354,6 +405,56 @@
       "summary": "Ensure the new Gallery/Activities backend state is upgrade-safe and does not erase existing deployed state (profiles, events, announcements, approvals, and authorization data) when the canister is upgraded.",
       "reqIds": [
         "REQ-31"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Add a \"Backend\" (admin-only) page that surfaces backend/system information (e.g., status, data summaries, logs/diagnostics) for admins to review.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Grant permanent admin access to the account chresthaxakxham@gmail.com (always able to access Admin + Backend pages) via an email-based super-admin allowlist or equivalent mechanism.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Add a backend (Motoko) admin-only API that returns a concise backend/system summary suitable for the Backend page (counts and basic diagnostics).",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Persist Backend page data in a database-like structure (sheet/table) so backend/system info is stored and can be viewed in tabular form, not just shown as transient diagnostics.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Add a persistent, database-like backend data model to store Backend page status snapshots (a \"sheet/table\" of rows) inside the Motoko canister state, where each row includes a unique id, a capturedAt timestamp, and the same count fields currently returned by getBackendStatus (profiles, events, announcements, gallery images, activities, approved users, pending users). Access must be admin-only.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Implement backend APIs to manage the stored backend status snapshots so the data can be viewed and managed as a table: (1) create/capture a new snapshot row, (2) list snapshot rows (most recent first), and (3) delete a snapshot row and/or clear all snapshots.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "Ensure the new backend snapshot storage is upgrade-safe and does not erase any existing deployed state (profiles, events, announcements, approvals, authorization data). Add conditional upgrade/migration handling only if required by the current persistence approach.",
+      "reqIds": [
+        "REQ-42"
       ],
       "status": "pending"
     }
