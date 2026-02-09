@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useGetEvents } from '@/hooks/useQueries';
-import { useAccess } from '@/hooks/useAccess';
+import { useBackendStatus } from '@/hooks/useBackendStatus';
 import RequireApproved from '@/components/RequireApproved';
+import BackendUnavailableCard from '@/components/BackendUnavailableCard';
 import EventCard from '@/components/EventCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,10 +18,27 @@ export default function EventsPage() {
 
 function EventsContent() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-  const { data: upcomingEvents = [], isLoading: upcomingLoading } = useGetEvents(false);
-  const { data: pastEvents = [], isLoading: pastLoading } = useGetEvents(true);
+  const { isReady: backendReady, isError: backendError, retry: retryBackend } = useBackendStatus();
+  const { data: upcomingEvents = [], isLoading: upcomingLoading, isError: upcomingError, refetch: refetchUpcoming } = useGetEvents(false);
+  const { data: pastEvents = [], isLoading: pastLoading, isError: pastError, refetch: refetchPast } = useGetEvents(true);
 
-  const isLoading = upcomingLoading || pastLoading;
+  const handleRetry = () => {
+    retryBackend();
+    refetchUpcoming();
+    refetchPast();
+  };
+
+  // Backend unavailable
+  if (backendError) {
+    return <BackendUnavailableCard onRetry={retryBackend} />;
+  }
+
+  // Query error
+  if (upcomingError || pastError) {
+    return <BackendUnavailableCard onRetry={handleRetry} title="Unable to Load Events" description="There was an error loading events. Please try again." />;
+  }
+
+  const isLoading = !backendReady || upcomingLoading || pastLoading;
 
   return (
     <div className="container py-8 md:py-12">

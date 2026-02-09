@@ -2,14 +2,54 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-prevent-the-app-from-getting-stuck-in-a-perpetual-loading-state-by-ensuring-user-profile-admin-approval-react-query-hooks-do-not-run-and-do-not-contribute-to-loading-spinners-when-the-user-is-not-authenticated",
-      "featureTitle": "Prevent the app from getting stuck in a perpetual loading state by ensuring user/profile/admin/approval React Query hooks do not run (and do not contribute to loading spinners) when the user is not authenticated.",
+      "featureId": "feature-add-react-query-hooks-for-listing-and-mutating-gallery-and-acts-activities-content-following-the-existing-patterns-in-frontend-src-hooks-usequeries-ts-actor-availability-checks-cache-invalidation-and-no-unauthenticated-querying",
+      "featureTitle": "Add React Query hooks for listing and mutating Gallery and Acts & Activities content, following the existing patterns in frontend/src/hooks/useQueries.ts (actor availability checks, cache invalidation, and no unauthenticated querying).",
       "files": [
-        "frontend/src/components/RequireApproved.tsx",
-        "frontend/src/hooks/useAccess.ts",
-        "frontend/src/hooks/useCurrentUser.ts",
-        "frontend/src/hooks/useIsAdmin.ts",
-        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "user-approval@3.0.0"
+      ],
+      "testIds": [
+        "REQ-32"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-gallery-page-gallery-and-acts-activities-page-activities-to-display-backend-driven-content-instead-of-placeholder-arrays-while-preserving-the-existing-requireapproved-gating-and-showing-a-clear-empty-state-message-when-no-items-exist",
+      "featureTitle": "Update the Gallery page (/gallery) and Acts & Activities page (/activities) to display backend-driven content (instead of placeholder arrays), while preserving the existing RequireApproved gating and showing a clear empty-state message when no items exist.",
+      "files": [
+        "frontend/src/pages/ActivitiesPage.tsx",
+        "frontend/src/pages/GalleryPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "user-approval@3.0.0"
+      ],
+      "testIds": [
+        "REQ-33"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-admin-ui-in-the-admin-dashboard-to-manage-gallery-and-acts-activities-content-create-edit-delete-using-english-user-facing-text-and-respecting-existing-role-permission-gating-used-by-the-admin-dashboard",
+      "featureTitle": "Add admin UI in the Admin Dashboard to manage Gallery and Acts & Activities content (create, edit, delete), using English user-facing text and respecting existing role/permission gating used by the Admin Dashboard.",
+      "files": [
+        "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
+        "frontend/src/components/admin/ActivityEditorDialog.tsx",
+        "frontend/src/components/admin/GalleryAdminPanel.tsx",
+        "frontend/src/components/admin/GalleryEditorDialog.tsx",
         "frontend/src/pages/AdminDashboardPage.tsx"
       ],
       "components": [
@@ -22,55 +62,7 @@
         "user-approval@3.0.0"
       ],
       "testIds": [
-        "REQ-20"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-auth-approval-gating-ui-to-handle-backend-query-failures-gracefully-if-approval-admin-profile-checks-fail-or-the-backend-cannot-be-reached-show-an-explicit-error-message-with-a-retry-action-instead-of-showing-an-infinite-loading-indicator",
-      "featureTitle": "Update the auth/approval gating UI to handle backend/query failures gracefully: if approval/admin/profile checks fail or the backend cannot be reached, show an explicit error message with a retry action instead of showing an infinite loading indicator.",
-      "files": [
-        "frontend/src/components/RequireApproved.tsx",
-        "frontend/src/components/admin/MembersAdminPanel.tsx",
-        "frontend/src/hooks/useAccess.ts",
-        "frontend/src/hooks/useIsAdmin.ts",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/AdminDashboardPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "user-approval@3.0.0"
-      ],
-      "testIds": [
-        "REQ-21"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-that-the-landing-page-renders-reliably-even-if-the-backend-is-slow-unavailable-by-removing-any-dependency-on-backend-queries-for-its-initial-render-and-by-not-showing-a-full-page-loading-state-there",
-      "featureTitle": "Ensure that the landing page (\"/\") renders reliably even if the backend is slow/unavailable by removing any dependency on backend queries for its initial render and by not showing a full-page loading state there.",
-      "files": [
-        "frontend/src/components/AppHeader.tsx",
-        "frontend/src/hooks/useAccess.ts",
-        "frontend/src/hooks/useCurrentUser.ts",
-        "frontend/src/pages/LandingPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "user-approval@3.0.0"
-      ],
-      "testIds": [
-        "REQ-22"
+        "REQ-34"
       ],
       "confidence": "high"
     }

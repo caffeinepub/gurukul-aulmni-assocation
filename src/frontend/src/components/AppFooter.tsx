@@ -1,4 +1,5 @@
 import { Heart } from 'lucide-react';
+import BuildVersionLabel from './BuildVersionLabel';
 
 export default function AppFooter() {
   return (
@@ -16,6 +17,7 @@ export default function AppFooter() {
               caffeine.ai
             </a>
           </p>
+          <BuildVersionLabel />
         </div>
       </div>
     </footer>

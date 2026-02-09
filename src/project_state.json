@@ -1,16 +1,19 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 11,
+  "projectStateVersion": 17,
   "summary": "Build an app for an alumni association named \"Gurukul Aulmni Assocation\", including role-based administration, content/member management, and approved-member-only access.",
   "architectural_notes": [
     "Add role-based access control (RBAC) beyond a single admin list; define roles/permissions for content (posts/announcements) and member management actions.",
     "Introduce an approval state for members and enforce it during authentication/authorization so unapproved users cannot access the app.",
     "Add support for user-uploaded profile pictures (storage, URLs, privacy: visible to all) with a placeholder fallback.",
     "Add data model + admin CRUD for Executive Committee entries, including historical/past committees.",
-    "Add content models/pages for Gallery and Acts & Activities (likely admin-managed)."
+    "Add content models/pages for Gallery and Acts & Activities (likely admin-managed).",
+    "Provide admin-managed content models + CRUD UI for Gallery items and Acts & Activities entries (not just static pages)."
   ],
   "known_issues": [
-    "App is only showing a loading state (stuck on loading / not rendering content)."
+    "Admin Dashboard page is stuck on loading / not rendering, while other pages load correctly.",
+    "Admin page appears unchanged/old after deployment; expected new admin features/updates are not reflected (possible caching or deployment/versioning issue).",
+    "Gallery and Acts & Activities currently have no way for admins to add/manage content (missing admin content management UI/API)."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -157,6 +160,78 @@
         "REQ-22"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-app-so-that-authenticated-pages-directory-events-announcements-my-profile-gallery-and-acts-activities-do-not-get-stuck-in-an-infinite-loading-state-while-the-admin-dashboard-renders-correctly",
+      "title": "Fix the app so that authenticated pages (Directory, Events, Announcements, My Profile, Gallery, and Acts & Activities) do not get stuck in an infinite loading state while the Admin Dashboard renders correctly.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-approval-auth-gating-and-related-access-hooks-so-that-actor-agent-initialization-delays-or-failures-cannot-cause-an-infinite-loading-ui-instead-show-an-explicit-error-state-with-a-retry-action-that-re-attempts-the-relevant-queries",
+      "title": "Update the approval/auth gating and related access hooks so that actor/agent initialization delays or failures cannot cause an infinite loading UI; instead show an explicit error state with a Retry action that re-attempts the relevant queries.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-page-level-data-queries-for-directory-events-announcements-my-profile-correctly-handle-the-backend-being-unavailable-by-surfacing-an-error-state-in-english-rather-than-only-a-perpetual-loading-indicator",
+      "title": "Ensure page-level data queries for Directory/Events/Announcements/My Profile correctly handle the backend being unavailable by surfacing an error state (in English) rather than only a perpetual loading indicator.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-visible-app-build-version-indicator-in-the-ui-so-admins-can-confirm-that-the-latest-deployment-is-loaded-to-reduce-confusion-when-the-admin-page-appears-unchanged-show-this-indicator-on-the-admin-dashboard-page-and-in-the-global-footer",
+      "title": "Add a visible app build/version indicator in the UI so admins can confirm that the latest deployment is loaded (to reduce confusion when the Admin page appears unchanged). Show this indicator on the Admin Dashboard page and in the global footer.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-the-admin-dashboard-member-management-experience-to-support-the-additional-requested-information-show-separate-views-for-pending-vs-approved-members-and-display-member-identity-details-full-name-when-available-alongside-principal-ids",
+      "title": "Improve the Admin Dashboard member management experience to support the additional requested information: show separate views for Pending vs Approved members, and display member identity details (full name when available) alongside principal IDs.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-data-hooks-and-the-members-admin-panel-to-use-the-new-enriched-backend-api-and-display-the-additional-member-details-in-the-members-table",
+      "title": "Update frontend data hooks and the Members admin panel to use the new enriched backend API and display the additional member details in the Members table.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-react-query-hooks-for-listing-and-mutating-gallery-and-acts-activities-content-following-the-existing-patterns-in-frontend-src-hooks-usequeries-ts-actor-availability-checks-cache-invalidation-and-no-unauthenticated-querying",
+      "title": "Add React Query hooks for listing and mutating Gallery and Acts & Activities content, following the existing patterns in frontend/src/hooks/useQueries.ts (actor availability checks, cache invalidation, and no unauthenticated querying).",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-gallery-page-gallery-and-acts-activities-page-activities-to-display-backend-driven-content-instead-of-placeholder-arrays-while-preserving-the-existing-requireapproved-gating-and-showing-a-clear-empty-state-message-when-no-items-exist",
+      "title": "Update the Gallery page (/gallery) and Acts & Activities page (/activities) to display backend-driven content (instead of placeholder arrays), while preserving the existing RequireApproved gating and showing a clear empty-state message when no items exist.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-admin-ui-in-the-admin-dashboard-to-manage-gallery-and-acts-activities-content-create-edit-delete-using-english-user-facing-text-and-respecting-existing-role-permission-gating-used-by-the-admin-dashboard",
+      "title": "Add admin UI in the Admin Dashboard to manage Gallery and Acts & Activities content (create, edit, delete), using English user-facing text and respecting existing role/permission gating used by the Admin Dashboard.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -250,6 +325,36 @@
       "id": "AR-23",
       "summary": "Create an Acts & Activities page for the alumni association app.",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Add a backend admin-only API that returns approval entries enriched with the member’s saved profile information (when present) so the Admin UI can show the signer’s name and other basic details without requiring N+1 per-member calls.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Add admin interfaces to create/update/delete content for the Gallery and Acts & Activities pages (so admins can add items to these sections).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Add backend data models and APIs to support admin-managed content for the Gallery and Acts & Activities sections, including admin-only create/update/delete operations and approved-member read/list operations.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Ensure the new Gallery/Activities backend state is upgrade-safe and does not erase existing deployed state (profiles, events, announcements, approvals, and authorization data) when the canister is upgraded.",
+      "reqIds": [
+        "REQ-31"
+      ],
       "status": "pending"
     }
   ],

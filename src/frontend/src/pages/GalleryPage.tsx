@@ -1,50 +1,84 @@
 import RequireApproved from '@/components/RequireApproved';
-import { Card, CardContent } from '@/components/ui/card';
-import { Camera, Image as ImageIcon } from 'lucide-react';
+import BackendUnavailableCard from '@/components/BackendUnavailableCard';
+import { useGetGalleryImages } from '@/hooks/useQueries';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Image } from 'lucide-react';
 
 export default function GalleryPage() {
   return (
     <RequireApproved>
-      <div className="container py-8">
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold tracking-tight">Gallery</h1>
-          <p className="text-muted-foreground">
-            Browse photos and memories from our alumni community
-          </p>
-        </div>
+      <GalleryContent />
+    </RequireApproved>
+  );
+}
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Placeholder gallery items */}
-          {[1, 2, 3, 4, 5, 6].map((item) => (
-            <Card key={item} className="overflow-hidden transition-shadow hover:shadow-lg">
-              <CardContent className="p-0">
-                <div className="flex aspect-video items-center justify-center bg-muted">
-                  <ImageIcon className="h-12 w-12 text-muted-foreground/50" />
-                </div>
-                <div className="p-4">
-                  <h3 className="mb-1 font-semibold">Event Photo {item}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    A memorable moment from our alumni gathering
-                  </p>
-                </div>
-              </CardContent>
+function GalleryContent() {
+  const { data: galleryImages, isLoading, isError, refetch } = useGetGalleryImages();
+
+  if (isLoading) {
+    return (
+      <div className="container flex min-h-[60vh] items-center justify-center py-12">
+        <div className="text-center">
+          <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading gallery...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <BackendUnavailableCard onRetry={refetch} title="Unable to Load Gallery" description="There was an error loading the gallery. Please try again." />;
+  }
+
+  return (
+    <div className="container py-8 md:py-12">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Image className="h-5 w-5 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Photo Gallery</h1>
+        </div>
+        <p className="text-muted-foreground">
+          Browse photos from alumni events and gatherings
+        </p>
+      </div>
+
+      {!galleryImages || galleryImages.length === 0 ? (
+        <Card className="border-dashed">
+          <CardHeader className="text-center py-12">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Image className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <CardTitle>No gallery items yet</CardTitle>
+            <CardDescription>
+              Gallery items will appear here once they are added by administrators
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {galleryImages.map((item) => (
+            <Card key={item.id.toString()} className="overflow-hidden">
+              <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
+                {item.imageUrl ? (
+                  <img 
+                    src={item.imageUrl} 
+                    alt={item.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Image className="h-12 w-12 text-muted-foreground" />
+                )}
+              </div>
+              <CardHeader className="p-4">
+                <CardTitle className="text-base">{item.title}</CardTitle>
+                <CardDescription className="text-sm">{item.description}</CardDescription>
+              </CardHeader>
             </Card>
           ))}
         </div>
-
-        {/* Empty state for when no photos exist */}
-        {false && (
-          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Camera className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="mb-2 text-lg font-semibold">No Photos Yet</h3>
-            <p className="mb-4 max-w-sm text-sm text-muted-foreground">
-              The gallery is currently empty. Check back soon for photos from upcoming events and activities.
-            </p>
-          </div>
-        )}
-      </div>
-    </RequireApproved>
+      )}
+    </div>
   );
 }

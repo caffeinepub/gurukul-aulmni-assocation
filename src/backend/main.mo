@@ -11,10 +11,9 @@ import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import UserApproval "user-approval/approval";
+import Migration "migration";
 
-
-// Use migration to ensure smooth upgrade from previous version (without approval system)
-
+(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -58,6 +57,35 @@ actor {
     content : Text;
   };
 
+  // Gallery and Acts & Activities types
+  type GalleryImage = {
+    id : Nat64;
+    imageUrl : Text;
+    title : Text;
+    description : Text;
+    timestampNanos : Int;
+  };
+
+  type EditableGalleryImage = {
+    imageUrl : Text;
+    title : Text;
+    description : Text;
+  };
+
+  type Activity = {
+    id : Nat64;
+    title : Text;
+    description : Text;
+    timestampNanos : Int;
+    photos : [Text];
+  };
+
+  type EditableActivity = {
+    title : Text;
+    description : Text;
+    photos : [Text];
+  };
+
   module Event {
     public func compare(a : Event, b : Event) : Order.Order {
       Nat64.compare(a.id, b.id);
@@ -70,12 +98,28 @@ actor {
     };
   };
 
+  module GalleryImage {
+    public func compare(a : GalleryImage, b : GalleryImage) : Order.Order {
+      Nat64.compare(a.id, b.id);
+    };
+  };
+
+  module Activity {
+    public func compare(a : Activity, b : Activity) : Order.Order {
+      Nat64.compare(a.id, b.id);
+    };
+  };
+
   let alumniProfiles = Map.empty<Principal, AlumniProfile>();
   let eventEntries = Map.empty<Nat64, Event>();
   let announcementEntries = Map.empty<Nat64, Announcement>();
+  let galleryImages = Map.empty<Nat64, GalleryImage>();
+  let activities = Map.empty<Nat64, Activity>();
 
   var nextEventId = 0 : Nat64;
   var nextAnnouncementId = 0 : Nat64;
+  var nextGalleryImageId = 0 : Nat64;
+  var nextActivityId = 0 : Nat64;
 
   func extractDirectoryEntry(profile : AlumniProfile) : (Nat16, Text) {
     (profile.graduationYear, profile.department);
@@ -358,7 +402,132 @@ actor {
     allFiltered;
   };
 
-  // Approval system functions
+  // Gallery management - admin only for create/update/delete
+  public shared ({ caller }) func createGalleryImage(image : EditableGalleryImage) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    let curId = nextGalleryImageId;
+    let newImage : GalleryImage = {
+      id = curId;
+      imageUrl = image.imageUrl;
+      title = image.title;
+      description = image.description;
+      timestampNanos = Time.now();
+    };
+
+    galleryImages.add(curId, newImage);
+    nextGalleryImageId += 1;
+  };
+
+  public shared ({ caller }) func updateGalleryImage(id : Nat64, updatedImage : EditableGalleryImage) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    switch (galleryImages.get(id)) {
+      case (null) {
+        Runtime.trap("Gallery image does not exist");
+      };
+      case (?existingImage) {
+        let updated : GalleryImage = {
+          id;
+          imageUrl = updatedImage.imageUrl;
+          title = updatedImage.title;
+          description = updatedImage.description;
+          timestampNanos = existingImage.timestampNanos;
+        };
+        galleryImages.add(id, updated);
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteGalleryImage(id : Nat64) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    switch (galleryImages.get(id)) {
+      case (null) {
+        Runtime.trap("Gallery image does not exist");
+      };
+      case (?_) {
+        galleryImages.remove(id);
+      };
+    };
+  };
+
+  public query ({ caller }) func getGalleryImages() : async [GalleryImage] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view gallery images");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to view gallery images");
+    };
+    galleryImages.values().toArray();
+  };
+
+  // Acts & Activities management - admin only for create/update/delete
+  public shared ({ caller }) func createActivity(activity : EditableActivity) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    let curId = nextActivityId;
+    let newActivity : Activity = {
+      id = curId;
+      title = activity.title;
+      description = activity.description;
+      timestampNanos = Time.now();
+      photos = activity.photos;
+    };
+
+    activities.add(curId, newActivity);
+    nextActivityId += 1;
+  };
+
+  public shared ({ caller }) func updateActivity(id : Nat64, updatedActivity : EditableActivity) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    switch (activities.get(id)) {
+      case (null) {
+        Runtime.trap("Activity does not exist");
+      };
+      case (?existingActivity) {
+        let updated : Activity = {
+          id;
+          title = updatedActivity.title;
+          description = updatedActivity.description;
+          timestampNanos = existingActivity.timestampNanos;
+          photos = updatedActivity.photos;
+        };
+        activities.add(id, updated);
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteActivity(id : Nat64) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    switch (activities.get(id)) {
+      case (null) {
+        Runtime.trap("Activity does not exist");
+      };
+      case (?_) {
+        activities.remove(id);
+      };
+    };
+  };
+
+  public query ({ caller }) func getActivities() : async [Activity] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view activities");
+    };
+    if (not isCallerApprovedOrAdmin(caller)) {
+      Runtime.trap("Unauthorized: User must be approved to view activities");
+    };
+    activities.values().toArray();
+  };
+
   public shared ({ caller }) func requestApproval() : async () {
     UserApproval.requestApproval(approvalState, caller);
   };
@@ -368,6 +537,30 @@ actor {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     UserApproval.setApproval(approvalState, user, status);
+  };
+
+  // Approval API: only returns approval state now
+  public query ({ caller }) func listApprovalStates() : async [(Principal, UserApproval.ApprovalStatus)] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    let approvals : [(Principal, UserApproval.ApprovalStatus)] = UserApproval.listApprovals(approvalState).map(
+      func(info) { (info.principal, info.status) }
+    );
+    approvals;
+  };
+
+  public query ({ caller }) func listApprovalStatesWithProfiles() : async [(Principal, UserApproval.ApprovalStatus, ?AlumniProfile)] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
+    UserApproval.listApprovals(approvalState).map(
+      func(info) {
+        (info.principal, info.status, alumniProfiles.get(info.principal));
+      }
+    );
   };
 
   public query ({ caller }) func listApprovals() : async [UserApproval.UserApprovalInfo] {

@@ -1,5 +1,7 @@
 import { useGetAnnouncements } from '@/hooks/useQueries';
+import { useBackendStatus } from '@/hooks/useBackendStatus';
 import RequireApproved from '@/components/RequireApproved';
+import BackendUnavailableCard from '@/components/BackendUnavailableCard';
 import AnnouncementCard from '@/components/AnnouncementCard';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Megaphone, Loader2 } from 'lucide-react';
@@ -13,7 +15,25 @@ export default function AnnouncementsPage() {
 }
 
 function AnnouncementsContent() {
-  const { data: announcements = [], isLoading } = useGetAnnouncements();
+  const { isReady: backendReady, isError: backendError, retry: retryBackend } = useBackendStatus();
+  const { data: announcements = [], isLoading: announcementsLoading, isError: announcementsError, refetch: refetchAnnouncements } = useGetAnnouncements();
+
+  const handleRetry = () => {
+    retryBackend();
+    refetchAnnouncements();
+  };
+
+  // Backend unavailable
+  if (backendError) {
+    return <BackendUnavailableCard onRetry={retryBackend} />;
+  }
+
+  // Query error
+  if (announcementsError) {
+    return <BackendUnavailableCard onRetry={handleRetry} title="Unable to Load Announcements" description="There was an error loading announcements. Please try again." />;
+  }
+
+  const isLoading = !backendReady || announcementsLoading;
 
   return (
     <div className="container py-8 md:py-12">

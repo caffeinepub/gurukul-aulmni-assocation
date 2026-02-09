@@ -1,119 +1,94 @@
 import RequireApproved from '@/components/RequireApproved';
+import BackendUnavailableCard from '@/components/BackendUnavailableCard';
+import { useGetActivities } from '@/hooks/useQueries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Users, Trophy } from 'lucide-react';
+import { Activity, Image } from 'lucide-react';
 
 export default function ActivitiesPage() {
-  // Placeholder activities data
-  const activities = [
-    {
-      id: 1,
-      title: 'Annual Sports Meet',
-      description: 'Join us for a day of friendly competition and camaraderie with various sports activities including cricket, football, and athletics.',
-      date: 'March 15, 2026',
-      location: 'Gurukul Sports Complex',
-      category: 'Sports',
-      participants: 45,
-    },
-    {
-      id: 2,
-      title: 'Cultural Evening',
-      description: 'Celebrate our rich cultural heritage with music, dance, and drama performances by talented alumni.',
-      date: 'April 20, 2026',
-      location: 'Main Auditorium',
-      category: 'Cultural',
-      participants: 120,
-    },
-    {
-      id: 3,
-      title: 'Career Mentorship Program',
-      description: 'Connect with experienced alumni for career guidance and professional development opportunities.',
-      date: 'Ongoing',
-      location: 'Virtual & In-person',
-      category: 'Professional',
-      participants: 78,
-    },
-    {
-      id: 4,
-      title: 'Community Service Drive',
-      description: 'Give back to the community through various social service initiatives and volunteer activities.',
-      date: 'May 10, 2026',
-      location: 'Various Locations',
-      category: 'Social',
-      participants: 62,
-    },
-  ];
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'Sports':
-        return 'bg-blue-500/10 text-blue-700 dark:text-blue-400';
-      case 'Cultural':
-        return 'bg-purple-500/10 text-purple-700 dark:text-purple-400';
-      case 'Professional':
-        return 'bg-green-500/10 text-green-700 dark:text-green-400';
-      case 'Social':
-        return 'bg-amber-500/10 text-amber-700 dark:text-amber-400';
-      default:
-        return 'bg-gray-500/10 text-gray-700 dark:text-gray-400';
-    }
-  };
-
   return (
     <RequireApproved>
-      <div className="container py-8">
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold tracking-tight">Acts & Activities</h1>
-          <p className="text-muted-foreground">
-            Explore and participate in various alumni activities and programs
-          </p>
-        </div>
+      <ActivitiesContent />
+    </RequireApproved>
+  );
+}
 
+function ActivitiesContent() {
+  const { data: activities, isLoading, isError, refetch } = useGetActivities();
+
+  if (isLoading) {
+    return (
+      <div className="container flex min-h-[60vh] items-center justify-center py-12">
+        <div className="text-center">
+          <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading activities...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <BackendUnavailableCard onRetry={refetch} title="Unable to Load Activities" description="There was an error loading activities. Please try again." />;
+  }
+
+  return (
+    <div className="container py-8 md:py-12">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Activity className="h-5 w-5 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Acts & Activities</h1>
+        </div>
+        <p className="text-muted-foreground">
+          Explore and participate in various alumni activities and events
+        </p>
+      </div>
+
+      {!activities || activities.length === 0 ? (
+        <Card className="border-dashed">
+          <CardHeader className="text-center py-12">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Activity className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <CardTitle>No activities yet</CardTitle>
+            <CardDescription>
+              Activities will appear here once they are added by administrators
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {activities.map((activity) => (
-            <Card key={activity.id} className="transition-shadow hover:shadow-lg">
+            <Card key={activity.id.toString()}>
               <CardHeader>
-                <div className="mb-2 flex items-start justify-between">
-                  <CardTitle className="text-xl">{activity.title}</CardTitle>
-                  <Badge className={getCategoryColor(activity.category)} variant="secondary">
-                    {activity.category}
-                  </Badge>
-                </div>
-                <CardDescription>{activity.description}</CardDescription>
+                <CardTitle>{activity.title}</CardTitle>
+                <CardDescription className="mt-2 whitespace-pre-wrap">
+                  {activity.description}
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>{activity.date}</span>
+              {activity.photos && activity.photos.length > 0 && (
+                <CardContent>
+                  <div className="grid gap-2 grid-cols-2 sm:grid-cols-3">
+                    {activity.photos.map((photoUrl, index) => (
+                      <div key={index} className="aspect-square bg-muted rounded-md overflow-hidden flex items-center justify-center">
+                        {photoUrl ? (
+                          <img 
+                            src={photoUrl} 
+                            alt={`${activity.title} photo ${index + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <Image className="h-8 w-8 text-muted-foreground" />
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{activity.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span>{activity.participants} participants</span>
-                  </div>
-                </div>
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
           ))}
         </div>
-
-        {/* Empty state for when no activities exist */}
-        {activities.length === 0 && (
-          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Trophy className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="mb-2 text-lg font-semibold">No Activities Yet</h3>
-            <p className="mb-4 max-w-sm text-sm text-muted-foreground">
-              There are currently no activities scheduled. Check back soon for upcoming programs and events.
-            </p>
-          </div>
-        )}
-      </div>
-    </RequireApproved>
+      )}
+    </div>
   );
 }

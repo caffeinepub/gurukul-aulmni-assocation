@@ -10,6 +10,13 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Activity {
+  'id' : bigint,
+  'title' : string,
+  'description' : string,
+  'timestampNanos' : bigint,
+  'photos' : Array<string>,
+}
 export interface AlumniProfile {
   'bio' : string,
   'contactInfo' : [] | [string],
@@ -28,6 +35,11 @@ export interface Announcement {
 export type ApprovalStatus = { 'pending' : null } |
   { 'approved' : null } |
   { 'rejected' : null };
+export interface EditableActivity {
+  'title' : string,
+  'description' : string,
+  'photos' : Array<string>,
+}
 export interface EditableAnnouncement { 'title' : string, 'content' : string }
 export interface EditableEvent {
   'title' : string,
@@ -35,11 +47,23 @@ export interface EditableEvent {
   'location' : string,
   'timestampNanos' : bigint,
 }
+export interface EditableGalleryImage {
+  'title' : string,
+  'description' : string,
+  'imageUrl' : string,
+}
 export interface Event {
   'id' : bigint,
   'title' : string,
   'description' : string,
   'location' : string,
+  'timestampNanos' : bigint,
+}
+export interface GalleryImage {
+  'id' : bigint,
+  'title' : string,
+  'description' : string,
+  'imageUrl' : string,
   'timestampNanos' : bigint,
 }
 export interface UserApprovalInfo {
@@ -52,10 +76,15 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'createActivity' : ActorMethod<[EditableActivity], undefined>,
   'createAnnouncement' : ActorMethod<[EditableAnnouncement], undefined>,
   'createEvent' : ActorMethod<[EditableEvent], undefined>,
+  'createGalleryImage' : ActorMethod<[EditableGalleryImage], undefined>,
+  'deleteActivity' : ActorMethod<[bigint], undefined>,
   'deleteAnnouncement' : ActorMethod<[bigint], undefined>,
   'deleteEvent' : ActorMethod<[bigint], undefined>,
+  'deleteGalleryImage' : ActorMethod<[bigint], undefined>,
+  'getActivities' : ActorMethod<[], Array<Activity>>,
   'getAlumniProfile' : ActorMethod<[Principal], [] | [AlumniProfile]>,
   'getAnnouncements' : ActorMethod<[], Array<Announcement>>,
   'getAnnouncementsByYearRange' : ActorMethod<
@@ -66,10 +95,16 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getDepartments' : ActorMethod<[], Array<string>>,
   'getEvents' : ActorMethod<[[] | [boolean]], Array<Event>>,
+  'getGalleryImages' : ActorMethod<[], Array<GalleryImage>>,
   'getGraduationYears' : ActorMethod<[], Uint16Array>,
   'getUserProfile' : ActorMethod<[Principal], [] | [AlumniProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isCallerApproved' : ActorMethod<[], boolean>,
+  'listApprovalStates' : ActorMethod<[], Array<[Principal, ApprovalStatus]>>,
+  'listApprovalStatesWithProfiles' : ActorMethod<
+    [],
+    Array<[Principal, ApprovalStatus, [] | [AlumniProfile]]>
+  >,
   'listApprovals' : ActorMethod<[], Array<UserApprovalInfo>>,
   'requestApproval' : ActorMethod<[], undefined>,
   'saveAlumniProfile' : ActorMethod<[AlumniProfile], undefined>,
@@ -79,7 +114,9 @@ export interface _SERVICE {
     Array<AlumniProfile>
   >,
   'setApproval' : ActorMethod<[Principal, ApprovalStatus], undefined>,
+  'updateActivity' : ActorMethod<[bigint, EditableActivity], undefined>,
   'updateEvent' : ActorMethod<[bigint, EditableEvent], undefined>,
+  'updateGalleryImage' : ActorMethod<[bigint, EditableGalleryImage], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

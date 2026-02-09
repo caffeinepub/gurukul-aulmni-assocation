@@ -1,117 +1,83 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Stop anonymous access queries, add access-check error UI, and make landing render backend-independent",
+  "title": "Admin-managed Gallery and Acts & Activities (frontend)",
   "requirements": [
     {
-      "id": "REQ-20",
-      "summary": "Disable profile/approval/admin React Query hooks when unauthenticated so signed-out users see auth-required UI instead of infinite loading.",
+      "id": "REQ-32",
+      "summary": "Add React Query hooks to list and admin-mutate Gallery and Activities content with auth/actor gating and cache invalidation.",
       "acceptanceCriteria": [
-        "When signed out, navigating to any protected route (e.g., /directory, /events, /announcements, /my-profile, /gallery, /activities) shows the expected \"Authentication Required\" UI (or the membership approval UI after login), not an indefinite \"Loading...\" spinner.",
-        "When signed out, the app does not fire backend queries for current user profile, approval status, or admin status.",
-        "When signed in, current user profile / approval / admin checks still run and the protected pages behave as before."
+        "frontend/src/hooks/useQueries.ts includes hooks to list Gallery items and list Activities items.",
+        "frontend/src/hooks/useQueries.ts includes hooks for admin-only mutations to create/update/delete Gallery items and Activities items.",
+        "All new queries are disabled when the actor is not ready and do not run when the user is not authenticated (consistent with existing hooks that gate by identity).",
+        "Successful mutations invalidate the relevant list query keys so the pages refresh without manual reload."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update access-related hooks (useGetCallerUserProfile, useIsCallerApproved, useListApprovals, etc.) to support an explicit `enabled` gate driven by authentication state (from Internet Identity), so queries do not run and do not contribute to loading UI while signed out. Verify the component's usage instructions before implementing (authorization + user-approval guidance about not fetching app data before login)."
-        },
-        {
-          "path": "frontend/src/hooks/useIsAdmin.ts",
-          "operation": "modify",
-          "description": "Gate the admin-status query so it never runs and never reports loading when the user is unauthenticated (use Internet Identity authentication state to control query enablement). Verify the component's usage instructions before implementing (authorization guidance)."
-        },
-        {
-          "path": "frontend/src/hooks/useCurrentUser.ts",
-          "operation": "modify",
-          "description": "Stop calling the current-user profile query when signed out; compute `isAuthenticated` directly from Internet Identity identity and only enable profile fetching when authenticated so signed-out routes do not get stuck in profile-loading. Verify the component's usage instructions before implementing (authorization guidance about clearing cached profile on logout)."
-        },
-        {
-          "path": "frontend/src/hooks/useAccess.ts",
-          "operation": "modify",
-          "description": "Rework aggregated access loading state so approval/admin checks only participate in loading when authenticated; avoid `isLoading` being true due solely to disabled queries. Verify the component's usage instructions before implementing (authorization + user-approval access gating)."
-        },
-        {
-          "path": "frontend/src/components/RequireApproved.tsx",
-          "operation": "modify",
-          "description": "Adjust gating logic so the unauthenticated state renders the \"Authentication Required\" UI immediately (no spinner) and so loading spinners only appear when authenticated and access checks are actually in-flight. Verify the component's usage instructions before implementing (authorization + user-approval flow)."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Ensure admin dashboard loading state is not driven by admin/approval queries when signed out (rely on updated useAccess/RequireApproved behavior) so it cannot show an indefinite spinner for unauthenticated users. Verify the component's usage instructions before implementing (authorization + user-approval admin gating)."
+          "description": "Add React Query hooks for Gallery and Activities using existing patterns: useInternetIdentity gating (no unauthenticated querying), actor availability checks, and list query invalidation on create/update/delete. Add list hooks for backend-driven reads (e.g., getGalleryImages/getActivities) and admin mutation hooks (create/update/delete) with query keys like ['galleryImages'] and ['activities']. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-21",
-      "summary": "Add explicit error states and retry actions for approval/admin/profile access checks so failures do not present as infinite loading.",
+      "id": "REQ-33",
+      "summary": "Render Gallery and Activities pages from backend-driven content with RequireApproved gating, plus empty/error states and retry.",
       "acceptanceCriteria": [
-        "If backend calls needed for a protected page fail (e.g., actor creation succeeds but queries error), the page displays an English error state (e.g., \"Unable to load data. Please try again.\") and provides a retry button.",
-        "Retrying re-attempts the failed query/queries and can recover without a full page reload.",
-        "Loading spinners are only shown while a request is actually in-flight (no permanent loading caused by disabled/blocked queries)."
+        "/gallery renders a list/grid of Gallery items retrieved from the backend and no longer uses the placeholder Array.from(...) items.",
+        "/activities renders a list/grid of Activities items retrieved from the backend and no longer uses the hardcoded placeholder array.",
+        "Both pages remain wrapped in RequireApproved.",
+        "If the backend returns zero items, each page shows an English empty-state message (e.g., \"No gallery items yet.\" / \"No activities yet.\").",
+        "If the backend is unavailable or the query fails, the page shows an English error state with a retry action (consistent with the app’s existing backend-unavailable patterns)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/pages/GalleryPage.tsx",
           "operation": "modify",
-          "description": "Stop swallowing errors for access-critical queries (profile + approval checks) so error information is available to the UI (e.g., expose `error`, `isError`, and `refetch` from React Query). Keep user-facing text in English. Verify the component's usage instructions before implementing (authorization + user-approval error handling guidance)."
+          "description": "Replace placeholder gallery array with backend-driven query hook usage (from useQueries.ts) and follow existing loading/error patterns (e.g., BackendUnavailableCard with retry). Keep RequireApproved wrapper, render a grid/list of returned items, and show a clear English empty state when no items exist. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/hooks/useIsAdmin.ts",
+          "path": "frontend/src/pages/ActivitiesPage.tsx",
           "operation": "modify",
-          "description": "Expose query error state and a refetch/retry mechanism for admin checks instead of returning false on failure, so the UI can display an explicit error and retry. Keep user-facing text in English. Verify the component's usage instructions before implementing (authorization error handling guidance)."
-        },
-        {
-          "path": "frontend/src/hooks/useAccess.ts",
-          "operation": "modify",
-          "description": "Include error aggregation for access checks (profile/approval/admin), and expose a single `retry()` (or individual refetch functions) that the UI can call from a Retry button without full page reload. Verify the component's usage instructions before implementing (authorization + user-approval gating)."
-        },
-        {
-          "path": "frontend/src/components/RequireApproved.tsx",
-          "operation": "modify",
-          "description": "Add an explicit English error state when authenticated but access checks (approval/profile) fail, including a Retry button that triggers the appropriate query refetch via updated hooks (no full reload). Ensure spinner is only shown when requests are in-flight. Verify the component's usage instructions before implementing (authorization + user-approval access control UI guidance)."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Add an explicit English error state for admin access determination failures (via updated useAccess), with a Retry button to re-run the admin/access queries. Ensure no permanent loading when queries are disabled/blocked. Verify the component's usage instructions before implementing (authorization + user-approval admin gating)."
-        },
-        {
-          "path": "frontend/src/components/admin/MembersAdminPanel.tsx",
-          "operation": "modify",
-          "description": "Add an explicit English error state and Retry action for the approvals list query (admin-only) rather than failing silently to an empty list on backend/query errors; retry should refetch without a full page reload. Verify the component's usage instructions before implementing (user-approval admin dashboard guidance)."
+          "description": "Replace hardcoded activities array with backend-driven query hook usage (from useQueries.ts) and follow existing loading/error patterns (e.g., BackendUnavailableCard with retry). Keep RequireApproved wrapper, render a grid/list of returned items, and show a clear English empty state when no items exist. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-22",
-      "summary": "Make the landing page render without any backend-query dependency and avoid full-page loading there even if backend is slow/unavailable.",
+      "id": "REQ-34",
+      "summary": "Add admin dashboard UI to create/edit/delete Gallery and Activities items with validation, admin-only access, and live refresh via query invalidation.",
       "acceptanceCriteria": [
-        "Visiting \"/\" always renders the landing page content without a full-page \"Loading...\" state, regardless of backend availability.",
-        "The header and landing page still correctly reflect authenticated vs unauthenticated state once Internet Identity finishes initializing."
+        "Admin Dashboard provides a clear way for admins to add new Gallery items and Activities items.",
+        "Admin Dashboard provides a way for admins to edit and delete existing Gallery items and Activities items.",
+        "Admin content management UI is only accessible to admins (consistent with current admin gating behavior).",
+        "All admin forms validate required fields and display English inline errors or toast feedback on failure.",
+        "After creating/updating/deleting an item, the corresponding list updates without a full page refresh."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useCurrentUser.ts",
-          "operation": "modify",
-          "description": "Ensure landing and header can render using Internet Identity initialization state without requiring backend queries: only fetch profile when authenticated, and avoid reporting a global loading state on unauthenticated landing render. Keep user-facing text in English. Verify the component's usage instructions before implementing (authorization guidance about not fetching app data before login)."
+          "path": "frontend/src/components/admin/GalleryAdminPanel.tsx",
+          "operation": "create",
+          "description": "Create an admin panel to manage Gallery items: list existing items, provide actions to add/edit/delete, and connect to the new Gallery query/mutation hooks. Use the app’s existing authorization-driven admin gating via AdminDashboardPage/useAccess (authorization component capability: role-based admin access). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/hooks/useAccess.ts",
-          "operation": "modify",
-          "description": "Ensure access aggregation does not trigger backend queries on initial landing render when unauthenticated, and does not propagate a loading state that could be used for full-page spinners. Verify the component's usage instructions before implementing (authorization + user-approval gating)."
+          "path": "frontend/src/components/admin/GalleryEditorDialog.tsx",
+          "operation": "create",
+          "description": "Create a dialog-based form for Gallery create/edit (and a delete confirmation flow) using existing shadcn/ui building blocks and sonner toasts for English success/failure feedback. Validate required fields (e.g., title, image URL) before mutation submission. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/AppHeader.tsx",
-          "operation": "modify",
-          "description": "Adjust header logic so authenticated vs unauthenticated rendering does not rely on access checks that can fail/timeout; ensure admin link logic remains correct once authenticated while header stays responsive even if backend is unavailable. Verify the component's usage instructions before implementing (authorization + user-approval role/approval checks)."
+          "path": "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
+          "operation": "create",
+          "description": "Create an admin panel to manage Activities items: list existing items, provide actions to add/edit/delete, and connect to the new Activities query/mutation hooks. Use the app’s existing authorization-driven admin gating via AdminDashboardPage/useAccess (authorization component capability: role-based admin access). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pages/LandingPage.tsx",
+          "path": "frontend/src/components/admin/ActivityEditorDialog.tsx",
+          "operation": "create",
+          "description": "Create a dialog-based form for Activities create/edit (and a delete confirmation flow) using existing shadcn/ui building blocks and sonner toasts for English success/failure feedback. Validate required fields (e.g., title, description; optional photo URLs list) before mutation submission. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboardPage.tsx",
           "operation": "modify",
-          "description": "Confirm landing page content renders immediately with no backend query dependency; if any auth-derived loading UI exists or is introduced, ensure it is not a full-page blocking spinner and only reflects Internet Identity initialization. Keep all user-facing text in English."
+          "description": "Wire the new Gallery and Activities admin panels into the existing Admin Dashboard 'Content' tab (alongside Announcement Management) using the same admin-only gating already enforced by useAccess/isAdmin. Ensure the new panels are reachable and not orphaned, and that list refresh happens via React Query invalidation after mutations. Verify the component's usage instructions before implementing."
         }
       ]
     }

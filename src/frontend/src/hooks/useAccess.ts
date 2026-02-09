@@ -1,6 +1,7 @@
 import { useIsAdmin } from './useIsAdmin';
 import { useIsCallerApproved } from './useQueries';
 import { useCurrentUser } from './useCurrentUser';
+import { useBackendStatus } from './useBackendStatus';
 
 export interface UserAccess {
   isAuthenticated: boolean;
@@ -16,14 +17,16 @@ export interface UserAccess {
 
 export function useAccess(): UserAccess {
   const { isAuthenticated, isLoading: authLoading } = useCurrentUser();
-  const { isApproved, isLoading: approvalLoading, isError: approvalError, refetch: refetchApproval } = useIsCallerApproved();
+  const { data: isApproved = false, isLoading: approvalLoading, isError: approvalError, refetch: refetchApproval } = useIsCallerApproved();
   const { isAdmin, isLoading: adminLoading, isError: adminError, refetch: refetchAdmin } = useIsAdmin();
+  const { isReady: backendReady, isLoading: backendLoading, isError: backendError, retry: retryBackend } = useBackendStatus();
 
   // Only show loading when authenticated and queries are actually running
-  const isLoading = isAuthenticated && (authLoading || approvalLoading || adminLoading);
-  const isError = isAuthenticated && (approvalError || adminError);
+  const isLoading = isAuthenticated && (authLoading || backendLoading || (backendReady && (approvalLoading || adminLoading)));
+  const isError = backendError || (isAuthenticated && backendReady && (approvalError || adminError));
 
   const retry = () => {
+    if (backendError) retryBackend();
     if (approvalError) refetchApproval();
     if (adminError) refetchAdmin();
   };

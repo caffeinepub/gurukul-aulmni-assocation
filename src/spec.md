@@ -1,11 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the app getting stuck on perpetual loading by preventing unauthenticated backend queries, adding clear error + retry states for failed gating checks, and ensuring the landing page renders without depending on backend availability.
+**Goal:** Enable admins to manage Gallery and Acts & Activities content via backend APIs and Admin Dashboard UI, and render these sections from backend data for approved members.
 
 **Planned changes:**
-- Ensure user/profile/admin/approval React Query hooks are disabled when the user is not authenticated so they do not run or contribute to loading spinners on protected routes.
-- Update protected-route auth/approval gating UI to show explicit English error states (with a retry action) when required backend checks fail, instead of infinite loading.
-- Adjust the landing page ("/") so it renders its content without any full-page loading state and without requiring backend queries for initial render, while still reflecting auth state once Internet Identity initializes.
+- Add backend data models and admin-only create/update/delete APIs for Gallery items and Acts & Activities items, plus approved-member (or admin) read/list APIs with consistent access enforcement and clear unauthorized trap messages.
+- Ensure new Gallery/Activities state persists across canister upgrades without impacting existing stored state (profiles, events, announcements, approvals, authorization/admin config).
+- Add React Query hooks to list and mutate Gallery/Activities content (admin-only mutations), gated by actor readiness and authentication, with cache invalidation after successful mutations.
+- Update `/gallery` and `/activities` pages to use backend-driven content (remove placeholder/hardcoded arrays), preserve `RequireApproved` gating, and show English empty/error states with retry.
+- Add Admin Dashboard UI for admins to create, edit, and delete Gallery and Acts & Activities items with English validation/errors and without full page refresh on updates.
 
-**User-visible outcome:** When signed out, protected pages show the expected “Authentication Required” (or membership approval UI after login) rather than an endless spinner; when backend checks fail, users see a clear error with a retry button; and the landing page always renders reliably even if the backend is slow/unavailable.
+**User-visible outcome:** Admins can add/edit/delete Gallery and Acts & Activities entries from the Admin Dashboard; approved members can view the updated Gallery and Activities pages populated from backend data, with clear empty/error messaging.

@@ -1,22 +1,32 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T13:12:03.433Z",
-  "summary": "The diff implements authentication-gated React Query execution for profile/admin (and likely approval) checks, adds explicit error states with retry actions to avoid infinite loading, and updates the landing page to render without backend-query dependencies. No clear unrequested features are evident from the diff summary.",
-  "missing_requirements": [],
+  "generatedAt": "2026-02-09T14:11:46.770Z",
+  "summary": "Frontend pages (/gallery, /activities) and Admin Dashboard UI panels/dialogs for managing Gallery and Activities were added/updated, and a migration module plus new backend state/types were introduced. However, the diff summary does not provide explicit evidence that the backend exposes the required admin-only CRUD and approved-member list/query APIs with the specified authorization/trap behavior.",
+  "missing_requirements": [
+    {
+      "id": "REQ-30",
+      "requirement": "Backend exposes admin-only methods to create, update, and delete Gallery items and Acts & Activities items; and approved-member (or admin) query methods to list them, enforcing the same access rules and clear unauthorized trap messages.",
+      "reason": "The provided backend/main.mo excerpt shows new types (GalleryImage, Activity), storage maps, and ID counters, but no visible public methods for list/create/update/delete or their authorization/trap logic. Because the diff is truncated, the required APIs cannot be confirmed from the evidence shown.",
+      "evidence": [
+        "backend/main.mo (truncated excerpt shows types/maps/IDs but no Gallery/Activity public APIs)"
+      ]
+    }
+  ],
   "hallucinated_features": [],
-  "confidence": 0.72,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/AppHeader.tsx",
-    "frontend/src/components/RequireApproved.tsx",
-    "frontend/src/components/admin/MembersAdminPanel.tsx",
-    "frontend/src/hooks/useAccess.ts",
-    "frontend/src/hooks/useCurrentUser.ts",
-    "frontend/src/hooks/useIsAdmin.ts",
+    "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
+    "frontend/src/components/admin/ActivityEditorDialog.tsx",
+    "frontend/src/components/admin/GalleryAdminPanel.tsx",
+    "frontend/src/components/admin/GalleryEditorDialog.tsx",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/ActivitiesPage.tsx",
     "frontend/src/pages/AdminDashboardPage.tsx",
-    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/GalleryPage.tsx",
     "project_state.json"
   ]
 }

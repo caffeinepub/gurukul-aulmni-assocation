@@ -1,90 +1,93 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T13:12:03.436Z",
+  "generatedAt": "2026-02-09T14:11:46.774Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
+    "total": 5,
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-20",
-        "summary": "Prevent the app from getting stuck in a perpetual loading state by ensuring user/profile/admin/approval React Query hooks do not run (and do not contribute to loading spinners) when the user is not authenticated.",
+        "id": "REQ-30",
+        "summary": "Add backend data models and APIs to support admin-managed content for the Gallery and Acts & Activities sections, including admin-only create/update/delete operations and approved-member read/list operations.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-31",
+        "summary": "Ensure the new Gallery/Activities backend state is upgrade-safe and does not erase existing deployed state (profiles, events, announcements, approvals, and authorization data) when the canister is upgraded.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-32",
+        "summary": "Add React Query hooks for listing and mutating Gallery and Acts & Activities content, following the existing patterns in frontend/src/hooks/useQueries.ts (actor availability checks, cache invalidation, and no unauthenticated querying).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useIsAdmin.ts",
-          "frontend/src/hooks/useCurrentUser.ts",
-          "frontend/src/hooks/useAccess.ts",
-          "frontend/src/components/RequireApproved.tsx",
-          "frontend/src/pages/AdminDashboardPage.tsx"
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useIsAdmin.ts",
-          "frontend/src/hooks/useCurrentUser.ts",
-          "frontend/src/hooks/useAccess.ts",
-          "frontend/src/components/RequireApproved.tsx",
-          "frontend/src/pages/AdminDashboardPage.tsx"
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
-        "id": "REQ-21",
-        "summary": "Update the auth/approval gating UI to handle backend/query failures gracefully: if approval/admin/profile checks fail or the backend cannot be reached, show an explicit error message with a retry action instead of showing an infinite loading indicator.",
+        "id": "REQ-33",
+        "summary": "Update the Gallery page (/gallery) and Acts & Activities page (/activities) to display backend-driven content (instead of placeholder arrays), while preserving the existing RequireApproved gating and showing a clear empty-state message when no items exist.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useIsAdmin.ts",
-          "frontend/src/hooks/useAccess.ts",
-          "frontend/src/components/RequireApproved.tsx",
-          "frontend/src/pages/AdminDashboardPage.tsx",
-          "frontend/src/components/admin/MembersAdminPanel.tsx"
+          "frontend/src/pages/GalleryPage.tsx",
+          "frontend/src/pages/ActivitiesPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useIsAdmin.ts",
-          "frontend/src/hooks/useAccess.ts",
-          "frontend/src/components/RequireApproved.tsx",
-          "frontend/src/pages/AdminDashboardPage.tsx",
-          "frontend/src/components/admin/MembersAdminPanel.tsx"
+          "frontend/src/pages/GalleryPage.tsx",
+          "frontend/src/pages/ActivitiesPage.tsx"
         ]
       },
       {
-        "id": "REQ-22",
-        "summary": "Ensure that the landing page (\"/\") renders reliably even if the backend is slow/unavailable by removing any dependency on backend queries for its initial render and by not showing a full-page loading state there.",
+        "id": "REQ-34",
+        "summary": "Add admin UI in the Admin Dashboard to manage Gallery and Acts & Activities content (create, edit, delete), using English user-facing text and respecting existing role/permission gating used by the Admin Dashboard.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useCurrentUser.ts",
-          "frontend/src/hooks/useAccess.ts",
-          "frontend/src/components/AppHeader.tsx",
-          "frontend/src/pages/LandingPage.tsx"
+          "frontend/src/components/admin/GalleryAdminPanel.tsx",
+          "frontend/src/components/admin/GalleryEditorDialog.tsx",
+          "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
+          "frontend/src/components/admin/ActivityEditorDialog.tsx",
+          "frontend/src/pages/AdminDashboardPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useCurrentUser.ts",
-          "frontend/src/hooks/useAccess.ts",
-          "frontend/src/components/AppHeader.tsx",
-          "frontend/src/pages/LandingPage.tsx"
+          "frontend/src/components/admin/GalleryAdminPanel.tsx",
+          "frontend/src/components/admin/GalleryEditorDialog.tsx",
+          "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
+          "frontend/src/components/admin/ActivityEditorDialog.tsx",
+          "frontend/src/pages/AdminDashboardPage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/AppHeader.tsx",
-    "frontend/src/components/RequireApproved.tsx",
-    "frontend/src/components/admin/MembersAdminPanel.tsx",
-    "frontend/src/hooks/useAccess.ts",
-    "frontend/src/hooks/useCurrentUser.ts",
-    "frontend/src/hooks/useIsAdmin.ts",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/admin/ActivitiesAdminPanel.tsx",
+    "frontend/src/components/admin/ActivityEditorDialog.tsx",
+    "frontend/src/components/admin/GalleryAdminPanel.tsx",
+    "frontend/src/components/admin/GalleryEditorDialog.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/ActivitiesPage.tsx",
     "frontend/src/pages/AdminDashboardPage.tsx",
-    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/GalleryPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

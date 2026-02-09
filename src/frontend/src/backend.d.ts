@@ -20,6 +20,25 @@ export interface UserApprovalInfo {
     status: ApprovalStatus;
     principal: Principal;
 }
+export interface EditableActivity {
+    title: string;
+    description: string;
+    photos: Array<string>;
+}
+export interface Activity {
+    id: bigint;
+    title: string;
+    description: string;
+    timestampNanos: bigint;
+    photos: Array<string>;
+}
+export interface GalleryImage {
+    id: bigint;
+    title: string;
+    description: string;
+    imageUrl: string;
+    timestampNanos: bigint;
+}
 export interface EditableEvent {
     title: string;
     description: string;
@@ -39,6 +58,11 @@ export interface Announcement {
     content: string;
     timestampNanos: bigint;
 }
+export interface EditableGalleryImage {
+    title: string;
+    description: string;
+    imageUrl: string;
+}
 export interface EditableAnnouncement {
     title: string;
     content: string;
@@ -55,10 +79,15 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    createActivity(activity: EditableActivity): Promise<void>;
     createAnnouncement(announcement: EditableAnnouncement): Promise<void>;
     createEvent(event: EditableEvent): Promise<void>;
+    createGalleryImage(image: EditableGalleryImage): Promise<void>;
+    deleteActivity(id: bigint): Promise<void>;
     deleteAnnouncement(id: bigint): Promise<void>;
     deleteEvent(id: bigint): Promise<void>;
+    deleteGalleryImage(id: bigint): Promise<void>;
+    getActivities(): Promise<Array<Activity>>;
     getAlumniProfile(user: Principal): Promise<AlumniProfile | null>;
     getAnnouncements(): Promise<Array<Announcement>>;
     getAnnouncementsByYearRange(startYear: number | null, endYear: number | null): Promise<Array<Announcement>>;
@@ -66,15 +95,20 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     getDepartments(): Promise<Array<string>>;
     getEvents(byPast: boolean | null): Promise<Array<Event>>;
+    getGalleryImages(): Promise<Array<GalleryImage>>;
     getGraduationYears(): Promise<Uint16Array>;
     getUserProfile(user: Principal): Promise<AlumniProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     isCallerApproved(): Promise<boolean>;
+    listApprovalStates(): Promise<Array<[Principal, ApprovalStatus]>>;
+    listApprovalStatesWithProfiles(): Promise<Array<[Principal, ApprovalStatus, AlumniProfile | null]>>;
     listApprovals(): Promise<Array<UserApprovalInfo>>;
     requestApproval(): Promise<void>;
     saveAlumniProfile(profile: AlumniProfile): Promise<void>;
     saveCallerUserProfile(profile: AlumniProfile): Promise<void>;
     searchAlumniProfiles(filterYear: number | null, filterDepartment: string | null): Promise<Array<AlumniProfile>>;
     setApproval(user: Principal, status: ApprovalStatus): Promise<void>;
+    updateActivity(id: bigint, updatedActivity: EditableActivity): Promise<void>;
     updateEvent(id: bigint, updatedEvent: EditableEvent): Promise<void>;
+    updateGalleryImage(id: bigint, updatedImage: EditableGalleryImage): Promise<void>;
 }

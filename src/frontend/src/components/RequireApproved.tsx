@@ -1,11 +1,13 @@
 import { type ReactNode } from 'react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useIsCallerApproved, useRequestApproval } from '@/hooks/useQueries';
+import { useBackendStatus } from '@/hooks/useBackendStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogIn, ShieldAlert, Clock, AlertCircle } from 'lucide-react';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 import { toast } from 'sonner';
+import BackendUnavailableCard from './BackendUnavailableCard';
 
 interface RequireApprovedProps {
   children: ReactNode;
@@ -13,7 +15,8 @@ interface RequireApprovedProps {
 
 export default function RequireApproved({ children }: RequireApprovedProps) {
   const { isAuthenticated, isLoading: authLoading } = useCurrentUser();
-  const { isApproved, isLoading: approvalLoading, isFetched, isError, refetch } = useIsCallerApproved();
+  const { data: isApproved, isLoading: approvalLoading, isFetched, isError: approvalError, refetch: refetchApproval } = useIsCallerApproved();
+  const { isReady: backendReady, isLoading: backendLoading, isError: backendError, retry: retryBackend } = useBackendStatus();
   const { login } = useInternetIdentity();
   const requestApprovalMutation = useRequestApproval();
 
@@ -27,13 +30,31 @@ export default function RequireApproved({ children }: RequireApprovedProps) {
   };
 
   const handleRetry = () => {
-    refetch();
+    retryBackend();
+    refetchApproval();
   };
 
-  // Only show loading when authenticated and queries are actually running
-  const isLoading = isAuthenticated && (authLoading || approvalLoading);
+  // Backend unavailable - show error with retry
+  if (backendError) {
+    return <BackendUnavailableCard onRetry={retryBackend} />;
+  }
 
-  // Loading state - only when authenticated
+  // Backend loading - only show when authenticated
+  if (isAuthenticated && backendLoading) {
+    return (
+      <div className="container flex min-h-[60vh] items-center justify-center py-12">
+        <div className="text-center">
+          <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Connecting to backend...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Only show loading when authenticated and queries are actually running
+  const isLoading = isAuthenticated && backendReady && (authLoading || approvalLoading);
+
+  // Loading state - only when authenticated and backend is ready
   if (isLoading) {
     return (
       <div className="container flex min-h-[60vh] items-center justify-center py-12">
@@ -69,7 +90,7 @@ export default function RequireApproved({ children }: RequireApprovedProps) {
   }
 
   // Error state - when authenticated but queries failed
-  if (isError) {
+  if (approvalError) {
     return (
       <div className="container flex min-h-[60vh] items-center justify-center py-12">
         <Card className="w-full max-w-md border-destructive/50">

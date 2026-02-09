@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useListApprovals, useSetApproval } from '@/hooks/useQueries';
+import { useListEnrichedApprovals, useSetApproval } from '@/hooks/useQueries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -24,17 +25,18 @@ import {
 import { Loader2, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { ApprovalStatus } from '@/backend';
-import type { UserApprovalInfo } from '@/backend';
+import type { EnrichedApprovalInfo } from '@/hooks/useQueries';
 import { Principal } from '@icp-sdk/core/principal';
 
 export default function MembersAdminPanel() {
-  const { data: approvals = [], isLoading, isError, refetch } = useListApprovals();
+  const { data: enrichedApprovals = [], isLoading, isError, refetch } = useListEnrichedApprovals();
   const setApprovalMutation = useSetApproval();
   const [confirmAction, setConfirmAction] = useState<{
     user: Principal;
     status: ApprovalStatus;
     action: string;
   } | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved'>('all');
 
   const handleSetApproval = async (user: Principal, status: ApprovalStatus) => {
     try {
@@ -76,6 +78,12 @@ export default function MembersAdminPanel() {
     const str = principal.toString();
     return `${str.slice(0, 8)}...${str.slice(-5)}`;
   };
+
+  const filteredApprovals = enrichedApprovals.filter((approval) => {
+    if (activeTab === 'pending') return approval.status === ApprovalStatus.pending;
+    if (activeTab === 'approved') return approval.status === ApprovalStatus.approved;
+    return true; // 'all' tab
+  });
 
   if (isLoading) {
     return (
@@ -125,71 +133,89 @@ export default function MembersAdminPanel() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {approvals.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No members to manage
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Principal ID</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {approvals.map((approval) => (
-                    <TableRow key={approval.principal.toString()}>
-                      <TableCell className="font-mono text-sm">
-                        {formatPrincipal(approval.principal)}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(approval.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          {approval.status !== ApprovalStatus.approved && (
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() =>
-                                setConfirmAction({
-                                  user: approval.principal,
-                                  status: ApprovalStatus.approved,
-                                  action: 'approve',
-                                })
-                              }
-                              disabled={setApprovalMutation.isPending}
-                            >
-                              <CheckCircle className="mr-1 h-3 w-3" />
-                              Approve
-                            </Button>
-                          )}
-                          {approval.status !== ApprovalStatus.rejected && (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() =>
-                                setConfirmAction({
-                                  user: approval.principal,
-                                  status: ApprovalStatus.rejected,
-                                  action: 'reject',
-                                })
-                              }
-                              disabled={setApprovalMutation.isPending}
-                            >
-                              <XCircle className="mr-1 h-3 w-3" />
-                              Reject
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'all' | 'pending' | 'approved')}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">All Members</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="approved">Approved</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={activeTab}>
+              {filteredApprovals.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No members to display
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Principal ID</TableHead>
+                        <TableHead>Full Name</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredApprovals.map((approval) => (
+                        <TableRow key={approval.principal.toString()}>
+                          <TableCell className="font-mono text-sm">
+                            {formatPrincipal(approval.principal)}
+                          </TableCell>
+                          <TableCell>
+                            {approval.profile ? (
+                              <span className="font-medium">{approval.profile.fullName}</span>
+                            ) : (
+                              <span className="text-muted-foreground italic">No profile</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(approval.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              {approval.status !== ApprovalStatus.approved && (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() =>
+                                    setConfirmAction({
+                                      user: approval.principal,
+                                      status: ApprovalStatus.approved,
+                                      action: 'approve',
+                                    })
+                                  }
+                                  disabled={setApprovalMutation.isPending}
+                                >
+                                  <CheckCircle className="mr-1 h-3 w-3" />
+                                  Approve
+                                </Button>
+                              )}
+                              {approval.status !== ApprovalStatus.rejected && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() =>
+                                    setConfirmAction({
+                                      user: approval.principal,
+                                      status: ApprovalStatus.rejected,
+                                      action: 'reject',
+                                    })
+                                  }
+                                  disabled={setApprovalMutation.isPending}
+                                >
+                                  <XCircle className="mr-1 h-3 w-3" />
+                                  Reject
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useSearchAlumniProfiles, useGetGraduationYears, useGetDepartments } from '@/hooks/useQueries';
+import { useBackendStatus } from '@/hooks/useBackendStatus';
 import RequireApproved from '@/components/RequireApproved';
+import BackendUnavailableCard from '@/components/BackendUnavailableCard';
 import DirectoryFilters from '@/components/DirectoryFilters';
 import AlumniCard from '@/components/AlumniCard';
 import AlumniProfileDetailDialog from '@/components/AlumniProfileDetailDialog';
@@ -22,9 +24,29 @@ function DirectoryContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProfile, setSelectedProfile] = useState<AlumniProfile | null>(null);
 
-  const { data: profiles = [], isLoading } = useSearchAlumniProfiles(selectedYear, selectedDepartment);
-  const { data: years = [] } = useGetGraduationYears();
-  const { data: departments = [] } = useGetDepartments();
+  const { isReady: backendReady, isError: backendError, retry: retryBackend } = useBackendStatus();
+  const { data: profiles = [], isLoading: profilesLoading, isError: profilesError, refetch: refetchProfiles } = useSearchAlumniProfiles(selectedYear, selectedDepartment);
+  const { data: years = [], refetch: refetchYears } = useGetGraduationYears();
+  const { data: departments = [], refetch: refetchDepartments } = useGetDepartments();
+
+  const handleRetry = () => {
+    retryBackend();
+    refetchProfiles();
+    refetchYears();
+    refetchDepartments();
+  };
+
+  // Backend unavailable
+  if (backendError) {
+    return <BackendUnavailableCard onRetry={retryBackend} />;
+  }
+
+  // Query error
+  if (profilesError) {
+    return <BackendUnavailableCard onRetry={handleRetry} title="Unable to Load Directory" description="There was an error loading the alumni directory. Please try again." />;
+  }
+
+  const isLoading = !backendReady || profilesLoading;
 
   const filteredProfiles = profiles.filter((profile) =>
     profile.fullName.toLowerCase().includes(searchQuery.toLowerCase())

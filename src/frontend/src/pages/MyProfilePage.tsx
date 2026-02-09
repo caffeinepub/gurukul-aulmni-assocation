@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useGetCallerUserProfile, useSaveCallerUserProfile } from '@/hooks/useQueries';
+import { useBackendStatus } from '@/hooks/useBackendStatus';
 import RequireApproved from '@/components/RequireApproved';
+import BackendUnavailableCard from '@/components/BackendUnavailableCard';
 import AlumniProfileForm from '@/components/AlumniProfileForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +23,8 @@ export default function MyProfilePage() {
 function MyProfileContent() {
   const navigate = useNavigate();
   const { isAuthenticated } = useCurrentUser();
-  const { data: profile, isLoading, isFetched } = useGetCallerUserProfile();
+  const { isReady: backendReady, isError: backendError, retry: retryBackend } = useBackendStatus();
+  const { data: profile, isLoading: profileLoading, isFetched, isError: profileError, refetch: refetchProfile } = useGetCallerUserProfile();
   const saveMutation = useSaveCallerUserProfile();
   const [formData, setFormData] = useState<AlumniProfile | null>(null);
 
@@ -40,9 +43,26 @@ function MyProfileContent() {
     }
   };
 
+  const handleRetry = () => {
+    retryBackend();
+    refetchProfile();
+  };
+
   if (!isAuthenticated) {
     return null;
   }
+
+  // Backend unavailable
+  if (backendError) {
+    return <BackendUnavailableCard onRetry={retryBackend} />;
+  }
+
+  // Query error
+  if (profileError) {
+    return <BackendUnavailableCard onRetry={handleRetry} title="Unable to Load Profile" description="There was an error loading your profile. Please try again." />;
+  }
+
+  const isLoading = !backendReady || profileLoading;
 
   if (isLoading) {
     return (

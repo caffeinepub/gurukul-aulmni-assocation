@@ -1,72 +1,116 @@
 {
   "kind": "build_request",
-  "title": "Fix app stuck on loading by preventing anonymous backend queries and adding clear error states",
-  "priority": "high",
+  "title": "Add admin-managed content for Gallery and Acts & Activities",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-20",
-      "text": "Prevent the app from getting stuck in a perpetual loading state by ensuring user/profile/admin/approval React Query hooks do not run (and do not contribute to loading spinners) when the user is not authenticated.",
-      "target": "frontend",
+      "id": "REQ-30",
+      "text": "Add backend data models and APIs to support admin-managed content for the Gallery and Acts & Activities sections, including admin-only create/update/delete operations and approved-member read/list operations.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-5"
         ],
         "quotes": [
-          "app is ony showing loading"
+          "there is no way to add in acts & activites & in gallary"
         ]
       },
       "acceptanceCriteria": [
-        "When signed out, navigating to any protected route (e.g., /directory, /events, /announcements, /my-profile, /gallery, /activities) shows the expected \"Authentication Required\" UI (or the membership approval UI after login), not an indefinite \"Loading...\" spinner.",
-        "When signed out, the app does not fire backend queries for current user profile, approval status, or admin status.",
-        "When signed in, current user profile / approval / admin checks still run and the protected pages behave as before."
+        "Backend exposes admin-only methods to create, update, and delete Gallery items.",
+        "Backend exposes admin-only methods to create, update, and delete Acts & Activities items.",
+        "Backend exposes approved-member (or admin) query methods to list Gallery items and list Activities items.",
+        "All new read/list queries enforce the same access rules as other authenticated resources (user permission + approved member or admin).",
+        "All new write methods are restricted to admins and return clear trap messages on unauthorized access."
       ]
     },
     {
-      "id": "REQ-21",
-      "text": "Update the auth/approval gating UI to handle backend/query failures gracefully: if approval/admin/profile checks fail or the backend cannot be reached, show an explicit error message with a retry action instead of showing an infinite loading indicator.",
-      "target": "frontend",
+      "id": "REQ-31",
+      "text": "Ensure the new Gallery/Activities backend state is upgrade-safe and does not erase existing deployed state (profiles, events, announcements, approvals, and authorization data) when the canister is upgraded.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-5"
         ],
         "quotes": [
-          "app is ony showing loading"
+          "there is no way to add in acts & activites & in gallary"
         ]
       },
       "acceptanceCriteria": [
-        "If backend calls needed for a protected page fail (e.g., actor creation succeeds but queries error), the page displays an English error state (e.g., \"Unable to load data. Please try again.\") and provides a retry button.",
-        "Retrying re-attempts the failed query/queries and can recover without a full page reload.",
-        "Loading spinners are only shown while a request is actually in-flight (no permanent loading caused by disabled/blocked queries)."
+        "After upgrading, previously stored alumni profiles, events, announcements, approvals, and authorization/admin configuration remain intact.",
+        "New Gallery and Activities items persist across canister upgrades.",
+        "If migration code is required by the project’s migration policy, add/adjust backend/migration.mo accordingly; otherwise keep changes confined to backend/main.mo in a way that preserves existing state."
       ]
     },
     {
-      "id": "REQ-22",
-      "text": "Ensure that the landing page (\"/\") renders reliably even if the backend is slow/unavailable by removing any dependency on backend queries for its initial render and by not showing a full-page loading state there.",
+      "id": "REQ-32",
+      "text": "Add React Query hooks for listing and mutating Gallery and Acts & Activities content, following the existing patterns in frontend/src/hooks/useQueries.ts (actor availability checks, cache invalidation, and no unauthenticated querying).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-5"
         ],
         "quotes": [
-          "app is ony showing loading"
+          "there is no way to add in acts & activites & in gallary"
         ]
       },
       "acceptanceCriteria": [
-        "Visiting \"/\" always renders the landing page content without a full-page \"Loading...\" state, regardless of backend availability.",
-        "The header and landing page still correctly reflect authenticated vs unauthenticated state once Internet Identity finishes initializing."
+        "frontend/src/hooks/useQueries.ts includes hooks to list Gallery items and list Activities items.",
+        "frontend/src/hooks/useQueries.ts includes hooks for admin-only mutations to create/update/delete Gallery items and Activities items.",
+        "All new queries are disabled when the actor is not ready and do not run when the user is not authenticated (consistent with existing hooks that gate by identity).",
+        "Successful mutations invalidate the relevant list query keys so the pages refresh without manual reload."
+      ]
+    },
+    {
+      "id": "REQ-33",
+      "text": "Update the Gallery page (/gallery) and Acts & Activities page (/activities) to display backend-driven content (instead of placeholder arrays), while preserving the existing RequireApproved gating and showing a clear empty-state message when no items exist.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "there is no way to add in acts & activites & in gallary"
+        ]
+      },
+      "acceptanceCriteria": [
+        "/gallery renders a list/grid of Gallery items retrieved from the backend and no longer uses the placeholder Array.from(...) items.",
+        "/activities renders a list/grid of Activities items retrieved from the backend and no longer uses the hardcoded placeholder array.",
+        "Both pages remain wrapped in RequireApproved.",
+        "If the backend returns zero items, each page shows an English empty-state message (e.g., \"No gallery items yet.\" / \"No activities yet.\").",
+        "If the backend is unavailable or the query fails, the page shows an English error state with a retry action (consistent with the app’s existing backend-unavailable patterns)."
+      ]
+    },
+    {
+      "id": "REQ-34",
+      "text": "Add admin UI in the Admin Dashboard to manage Gallery and Acts & Activities content (create, edit, delete), using English user-facing text and respecting existing role/permission gating used by the Admin Dashboard.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "there is no way to add in acts & activites & in gallary"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin Dashboard provides a clear way for admins to add new Gallery items and Activities items.",
+        "Admin Dashboard provides a way for admins to edit and delete existing Gallery items and Activities items.",
+        "Admin content management UI is only accessible to admins (consistent with current admin gating behavior).",
+        "All admin forms validate required fields and display English inline errors or toast feedback on failure.",
+        "After creating/updating/deleting an item, the corresponding list updates without a full page refresh."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts (immutable path).",
-    "Do not modify files under frontend/src/hooks/useActor.ts (immutable path).",
-    "Keep the backend as a single Motoko actor (no additional canisters/services).",
-    "All user-facing text must be in English."
+    "Backend must remain a single Motoko actor with logic in backend/main.mo (generate backend/migration.mo only if required by the conditional migration policy).",
+    "Do not edit files under frontend/src/components/ui (compose them instead).",
+    "Do not edit immutable frontend paths listed in SYSTEM_CONTEXT (use safe wrappers/components instead if changes are needed).",
+    "Use English for all user-facing UI text."
   ],
   "nonGoals": [
-    "Adding new features unrelated to the loading issue.",
-    "Changing the approved-member workflow rules or relaxing authorization requirements.",
-    "Introducing external logging/monitoring or third-party services."
+    "Implementing image file uploads stored in-canister for Gallery items (only content management is required; image handling can be URL/text-based unless explicitly requested).",
+    "Adding real-time updates or WebSocket-based syncing.",
+    "Changing existing Directory/Events/Announcements/Profile behavior beyond what is required to integrate the new content management."
   ],
   "imageRequirements": {
     "required": [],
