@@ -1,0 +1,295 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Gurukul Aulmni Assocation Alumni Association App (MVP) — Frontend",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Create a responsive public landing page introducing the association with clear Sign in and Browse calls to action.",
+      "acceptanceCriteria": [
+        "Landing page displays the association name exactly as \"Gurukul Aulmni Assocation\".",
+        "Page is responsive on mobile and desktop.",
+        "Primary actions include: Sign in (Internet Identity) and Browse (read-only previews or prompt to sign in)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the top-level app with client-side routing and a shared layout; wire the landing page route as the default entry and ensure unauthenticated users can access public routes."
+        },
+        {
+          "path": "frontend/src/pages/LandingPage.tsx",
+          "operation": "create",
+          "description": "Implement the public, responsive landing page copy and calls-to-action for Sign in and Browse; include a brief association intro and link users into Directory/Events/Announcements flows."
+        },
+        {
+          "path": "frontend/src/components/AppHeader.tsx",
+          "operation": "create",
+          "description": "Add a shared header/navigation used across pages with prominent Sign in/Sign out and Browse links; ensure navigation works on mobile (collapsible) and desktop."
+        },
+        {
+          "path": "frontend/src/components/AppLayout.tsx",
+          "operation": "create",
+          "description": "Create a shared layout wrapper (header + main + footer) to ensure consistent spacing and responsive container behavior across all required pages."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Add Internet Identity sign-in/sign-out UI and show authenticated state with the user’s principal (or short form) in the header.",
+      "acceptanceCriteria": [
+        "User can sign in and sign out using Internet Identity.",
+        "When signed in, the UI indicates authenticated state (e.g., principal displayed).",
+        "Unauthenticated users are prompted to sign in when attempting member-only actions."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AuthButton.tsx",
+          "operation": "create",
+          "description": "Create a Sign in / Sign out button UI by composing the existing auth hook (Internet Identity) and clearing react-query cache on logout as recommended by the authorization component. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Show authenticated state in the header: display either the saved profile full name (preferred) and also a short-form principal (to satisfy the requirement) when signed in; show Sign in when signed out. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/RequireAuth.tsx",
+          "operation": "create",
+          "description": "Add a small wrapper component to guard member-only actions/routes by checking Internet Identity presence; when unauthenticated, render a prompt and a Sign in action."
+        },
+        {
+          "path": "frontend/src/hooks/useCurrentUser.ts",
+          "operation": "create",
+          "description": "Create a hook that derives auth state (isAuthenticated, principal string/short form) from useInternetIdentity and optionally fetches the caller’s profile to display a friendly name; handle loading states to avoid UI flicker. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Implement signed-in user alumni profile create/update UI with validation and persistence via backend calls.",
+      "acceptanceCriteria": [
+        "A signed-in user can create a profile and later edit it.",
+        "Profiles are persisted in the backend canister and reload correctly after refresh.",
+        "A user can only edit their own profile.",
+        "Validation prevents empty full name and invalid graduation year (non-numeric or unreasonable range)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/MyProfilePage.tsx",
+          "operation": "create",
+          "description": "Implement a signed-in-only My Profile page that loads the caller’s profile, shows a form for full name, graduation year, department/major, city/country, bio, and optional contact info; include client validation (required name, reasonable numeric year) and save via backend capability."
+        },
+        {
+          "path": "frontend/src/components/AlumniProfileForm.tsx",
+          "operation": "create",
+          "description": "Create a reusable profile form component (used by My Profile) with inline validation errors and consistent form styling; keep contact info optional and clearly labeled."
+        },
+        {
+          "path": "frontend/src/hooks/useAlumniProfile.ts",
+          "operation": "create",
+          "description": "Add react-query hooks for fetching and saving the caller’s alumni profile and for invalidating cached profile data after successful save; gracefully handle authorization failures by showing a sign-in prompt."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the My Profile page into the router and navigation; ensure it is protected by an auth guard so only signed-in users can access it."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Implement a searchable alumni directory with name search, year/department filters, and a profile detail view.",
+      "acceptanceCriteria": [
+        "Directory loads profiles from the backend and renders a list/grid.",
+        "Search by name works (case-insensitive).",
+        "Filters (year, department/major) narrow the results.",
+        "Clicking a directory entry opens a profile detail view.",
+        "Sensitive fields marked optional contact are not shown unless present."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/DirectoryPage.tsx",
+          "operation": "create",
+          "description": "Create the Directory page that fetches and renders alumni profiles, provides search and filter controls (year, department/major), and supports opening a detail view on click."
+        },
+        {
+          "path": "frontend/src/components/DirectoryFilters.tsx",
+          "operation": "create",
+          "description": "Add a filter/search control component with a name search input (case-insensitive filtering), a graduation year selector populated from backend capability, and a department selector populated from backend capability."
+        },
+        {
+          "path": "frontend/src/components/AlumniCard.tsx",
+          "operation": "create",
+          "description": "Create a directory list/grid item component showing name, graduation year, department/major, and location (city/country), without showing optional contact unless present."
+        },
+        {
+          "path": "frontend/src/components/AlumniProfileDetailDialog.tsx",
+          "operation": "create",
+          "description": "Implement a profile detail view (dialog/drawer) that opens when a directory item is clicked; show full profile fields and only render optional contact info when provided."
+        },
+        {
+          "path": "frontend/src/hooks/useDirectory.ts",
+          "operation": "create",
+          "description": "Add react-query hooks for loading department/year filter options and for running the directory search against backend capability; implement client-side case-insensitive name matching when appropriate."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Directory page route into the router and header navigation so users can browse from landing/header."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add Events pages for viewing upcoming/past events and an admin-only UI for creating/updating/deleting events.",
+      "acceptanceCriteria": [
+        "Any user can view the list of events sorted by date.",
+        "Admin users can create, edit, and delete events from the UI.",
+        "Non-admin users cannot access event management actions (UI hidden/disabled and backend enforced).",
+        "Event changes persist and are visible to all users after refresh."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/EventsPage.tsx",
+          "operation": "create",
+          "description": "Create an Events page that loads upcoming and past events from backend capability, sorts by date, and renders them in a consistent list layout with tabs/segmented control for upcoming vs past."
+        },
+        {
+          "path": "frontend/src/components/EventCard.tsx",
+          "operation": "create",
+          "description": "Create an event list item component displaying title, date/time, location, and description with responsive layout."
+        },
+        {
+          "path": "frontend/src/components/AdminOnly.tsx",
+          "operation": "create",
+          "description": "Create a reusable UI guard that checks admin status (via backend capability) and conditionally renders admin-only controls; show an access denied message for direct access attempts."
+        },
+        {
+          "path": "frontend/src/components/EventAdminPanel.tsx",
+          "operation": "create",
+          "description": "Implement an admin-only management panel embedded in the Events page for creating, editing, and deleting events; ensure controls are hidden/disabled for non-admin users."
+        },
+        {
+          "path": "frontend/src/components/EventEditorDialog.tsx",
+          "operation": "create",
+          "description": "Add a create/edit dialog for events with fields title, date/time, location, description; validate required fields and ensure timestamp handling is consistent for sorting."
+        },
+        {
+          "path": "frontend/src/hooks/useEvents.ts",
+          "operation": "create",
+          "description": "Add react-query hooks for fetching events and performing admin mutations (create/update/delete) with optimistic UX and cache invalidation; handle authorization failures gracefully."
+        },
+        {
+          "path": "frontend/src/hooks/useIsAdmin.ts",
+          "operation": "create",
+          "description": "Add a small hook to query admin status for the current caller and provide loading/error state for admin gating in the UI."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Events page route into the router and navigation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Add Announcements page for viewing announcements and an admin-only UI for creating/deleting announcements.",
+      "acceptanceCriteria": [
+        "Any user can view announcements sorted newest-first.",
+        "Admin users can create and delete announcements.",
+        "Non-admin users cannot create/delete announcements (UI + backend enforced).",
+        "Announcements persist and render correctly after refresh."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AnnouncementsPage.tsx",
+          "operation": "create",
+          "description": "Create an Announcements page that loads announcements from backend capability, sorts newest-first, and renders them in a readable layout."
+        },
+        {
+          "path": "frontend/src/components/AnnouncementCard.tsx",
+          "operation": "create",
+          "description": "Create an announcement list item component displaying title, date, and content with consistent typography and spacing."
+        },
+        {
+          "path": "frontend/src/components/AnnouncementAdminPanel.tsx",
+          "operation": "create",
+          "description": "Implement an admin-only panel embedded in the Announcements page for creating and deleting announcements; hide/disable for non-admin users using the shared admin guard."
+        },
+        {
+          "path": "frontend/src/components/AnnouncementComposerDialog.tsx",
+          "operation": "create",
+          "description": "Add a create dialog for announcements with title and content fields; validate required fields and show clear success/error states."
+        },
+        {
+          "path": "frontend/src/hooks/useAnnouncements.ts",
+          "operation": "create",
+          "description": "Add react-query hooks for fetching announcements and performing admin mutations (create/delete) with cache invalidation; handle authorization failures gracefully."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Announcements page route into the router and navigation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Create and apply a cohesive non-blue/purple visual theme across all pages and shared components.",
+      "acceptanceCriteria": [
+        "App has a consistent theme across header, pages, forms, and lists.",
+        "Primary colors are not blue/purple.",
+        "Key pages (Landing, Directory, Events, Announcements, My Profile) share consistent layout and navigation."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Create the global Tailwind entry with CSS variables for the theme and a cohesive palette (e.g., warm saffron/green/neutral) ensuring primary is not blue/purple; apply consistent typography and spacing defaults."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Adjust Tailwind theme extension as needed to support the chosen palette and ensure consistent component styling tokens across pages (without introducing a blue/purple primary)."
+        },
+        {
+          "path": "frontend/src/components/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Ensure consistent page container widths, spacing, and header/footer placement so Landing, Directory, Events, Announcements, and My Profile share a unified structure."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Include generated static branding images and render them in the landing/header UI from static assets.",
+      "acceptanceCriteria": [
+        "All required images are present under frontend/public/assets/generated.",
+        "Landing/header renders the generated logo and hero/banner image from static assets (not served via backend).",
+        "Images display crisply at common screen sizes without distortion."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/gurukul-logo.dim_512x512.png",
+          "operation": "create",
+          "description": "Add the generated static logo asset at frontend/public/assets/generated/gurukul-logo.dim_512x512.png and ensure it is referenced by UI components as a static file."
+        },
+        {
+          "path": "frontend/public/assets/generated/gurukul-hero.dim_1600x600.png",
+          "operation": "create",
+          "description": "Add the generated static hero/banner asset at frontend/public/assets/generated/gurukul-hero.dim_1600x600.png and ensure it is referenced by UI components as a static file."
+        },
+        {
+          "path": "frontend/src/components/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Render the generated logo image from frontend/public/assets/generated/gurukul-logo.dim_512x512.png in the header with appropriate sizing to avoid distortion."
+        },
+        {
+          "path": "frontend/src/pages/LandingPage.tsx",
+          "operation": "modify",
+          "description": "Render the generated hero/banner image from frontend/public/assets/generated/gurukul-hero.dim_1600x600.png on the landing page with responsive sizing/cropping to keep it crisp without distortion."
+        }
+      ]
+    }
+  ]
+}

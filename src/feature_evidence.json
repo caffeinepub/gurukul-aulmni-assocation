@@ -1,0 +1,182 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-a-responsive-public-landing-page-for-gurukul-aulmni-assocation-that-introduces-the-association-and-provides-clear-calls-to-action-to-sign-in-and-explore-the-app",
+      "featureTitle": "Create a responsive public landing page for \"Gurukul Aulmni Assocation\" that introduces the association and provides clear calls to action to sign in and explore the app.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AppHeader.tsx",
+        "frontend/src/components/AppLayout.tsx",
+        "frontend/src/pages/LandingPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-internet-identity-sign-in-and-sign-out-ui-and-show-the-signed-in-user-s-principal-or-a-short-form-in-the-app-header-navigation",
+      "featureTitle": "Add Internet Identity sign-in and sign-out UI, and show the signed-in user’s principal (or a short form) in the app header/navigation.",
+      "files": [
+        "frontend/src/components/AppHeader.tsx",
+        "frontend/src/components/AuthButton.tsx",
+        "frontend/src/components/RequireAuth.tsx",
+        "frontend/src/hooks/useCurrentUser.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-alumni-profile-management-allow-a-signed-in-user-to-create-update-their-own-alumni-profile-with-fields-full-name-graduation-year-department-major-current-city-country-bio-and-optional-contact-email-or-social-link",
+      "featureTitle": "Implement alumni profile management: allow a signed-in user to create/update their own alumni profile with fields: full name, graduation year, department/major, current city/country, bio, and optional contact (email or social link).",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AlumniProfileForm.tsx",
+        "frontend/src/pages/MyProfilePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-searchable-alumni-directory-page-that-lists-member-profiles-name-graduation-year-department-major-location-with-filters-for-graduation-year-and-department-major",
+      "featureTitle": "Implement a searchable alumni directory page that lists member profiles (name, graduation year, department/major, location) with filters for graduation year and department/major.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AlumniCard.tsx",
+        "frontend/src/components/AlumniProfileDetailDialog.tsx",
+        "frontend/src/components/DirectoryFilters.tsx",
+        "frontend/src/pages/DirectoryPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-events-feature-a-page-to-view-upcoming-past-events-title-date-time-location-description-and-an-admin-only-interface-to-create-update-delete-events",
+      "featureTitle": "Add Events feature: a page to view upcoming/past events (title, date/time, location, description) and an admin-only interface to create/update/delete events.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AdminOnly.tsx",
+        "frontend/src/components/EventAdminPanel.tsx",
+        "frontend/src/components/EventCard.tsx",
+        "frontend/src/components/EventEditorDialog.tsx",
+        "frontend/src/hooks/useIsAdmin.ts",
+        "frontend/src/pages/EventsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-announcements-feature-a-page-to-view-announcements-title-date-content-and-an-admin-only-interface-to-create-delete-announcements",
+      "featureTitle": "Add Announcements feature: a page to view announcements (title, date, content) and an admin-only interface to create/delete announcements.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AnnouncementAdminPanel.tsx",
+        "frontend/src/components/AnnouncementCard.tsx",
+        "frontend/src/components/AnnouncementComposerDialog.tsx",
+        "frontend/src/pages/AnnouncementsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-coherent-distinctive-visual-theme-for-the-app-and-apply-it-consistently-across-pages-typography-color-palette-spacing-and-components-avoid-a-blue-purple-primary-theme",
+      "featureTitle": "Create a coherent, distinctive visual theme for the app and apply it consistently across pages (typography, color palette, spacing, and components). Avoid a blue/purple primary theme.",
+      "files": [
+        "frontend/src/components/AppLayout.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-generate-and-include-required-static-images-for-branding-store-them-in-frontend-public-assets-generated-and-reference-them-in-the-ui-e-g-header-landing",
+      "featureTitle": "Generate and include required static images for branding, store them in frontend/public/assets/generated, and reference them in the UI (e.g., header/landing).",
+      "files": [
+        "frontend/src/components/AppHeader.tsx",
+        "frontend/src/pages/LandingPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

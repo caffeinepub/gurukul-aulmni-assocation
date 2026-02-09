@@ -1,0 +1,194 @@
+{
+  "kind": "build_request",
+  "title": "Create Gurukul Aulmni Assocation alumni association app (MVP)",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a responsive public landing page for \"Gurukul Aulmni Assocation\" that introduces the association and provides clear calls to action to sign in and explore the app.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Landing page displays the association name exactly as \"Gurukul Aulmni Assocation\".",
+        "Page is responsive on mobile and desktop.",
+        "Primary actions include: Sign in (Internet Identity) and Browse (read-only previews or prompt to sign in)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add Internet Identity sign-in and sign-out UI, and show the signed-in user’s principal (or a short form) in the app header/navigation.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can sign in and sign out using Internet Identity.",
+        "When signed in, the UI indicates authenticated state (e.g., principal displayed).",
+        "Unauthenticated users are prompted to sign in when attempting member-only actions."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Implement alumni profile management: allow a signed-in user to create/update their own alumni profile with fields: full name, graduation year, department/major, current city/country, bio, and optional contact (email or social link).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A signed-in user can create a profile and later edit it.",
+        "Profiles are persisted in the backend canister and reload correctly after refresh.",
+        "A user can only edit their own profile.",
+        "Validation prevents empty full name and invalid graduation year (non-numeric or unreasonable range)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement a searchable alumni directory page that lists member profiles (name, graduation year, department/major, location) with filters for graduation year and department/major.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Directory loads profiles from the backend and renders a list/grid.",
+        "Search by name works (case-insensitive).",
+        "Filters (year, department/major) narrow the results.",
+        "Clicking a directory entry opens a profile detail view.",
+        "Sensitive fields marked optional contact are not shown unless present."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add Events feature: a page to view upcoming/past events (title, date/time, location, description) and an admin-only interface to create/update/delete events.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Any user can view the list of events sorted by date.",
+        "Admin users can create, edit, and delete events from the UI.",
+        "Non-admin users cannot access event management actions (UI hidden/disabled and backend enforced).",
+        "Event changes persist and are visible to all users after refresh."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add Announcements feature: a page to view announcements (title, date, content) and an admin-only interface to create/delete announcements.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Any user can view announcements sorted newest-first.",
+        "Admin users can create and delete announcements.",
+        "Non-admin users cannot create/delete announcements (UI + backend enforced).",
+        "Announcements persist and render correctly after refresh."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Implement backend authorization and administration: create a simple admin list managed in-canister, with a secure method for initial admin assignment and admin management actions restricted to admins only.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend enforces that only admins can mutate events/announcements and manage admin list.",
+        "There is a defined mechanism to set the first admin (e.g., canister install-time default, or first authenticated caller) and it is documented in code comments.",
+        "Unauthorized calls return clear errors (or Result-style errors) and do not change state."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Create a coherent, distinctive visual theme for the app and apply it consistently across pages (typography, color palette, spacing, and components). Avoid a blue/purple primary theme.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "App has a consistent theme across header, pages, forms, and lists.",
+        "Primary colors are not blue/purple.",
+        "Key pages (Landing, Directory, Events, Announcements, My Profile) share consistent layout and navigation."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Generate and include required static images for branding, store them in frontend/public/assets/generated, and reference them in the UI (e.g., header/landing).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "make me a app for alumni association. alumni name: Gurukul Aulmni Assocation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All required images are present under frontend/public/assets/generated.",
+        "Landing/header renders the generated logo and hero/banner image from static assets (not served via backend).",
+        "Images display crisply at common screen sizes without distortion."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not modify files under frontend/src/components/ui; compose them instead.",
+    "Do not edit immutable hook/bootstrapping paths listed by the system (compose around them).",
+    "Use English for all user-facing text."
+  ],
+  "nonGoals": [
+    "Payments, donations, or membership fee collection.",
+    "Real-time chat or messaging.",
+    "Email/SMS notifications or integrations with external email providers.",
+    "Third-party auth providers other than Internet Identity.",
+    "Geolocation/maps features."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Alumni association logo mark with academic motif (gurukul-logo.dim_512x512.png)",
+      "Wide hero/banner illustration with alumni/community/education theme (gurukul-hero.dim_1600x600.png)"
+    ],
+    "edits": []
+  }
+}

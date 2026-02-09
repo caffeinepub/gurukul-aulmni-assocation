@@ -1,0 +1,140 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T12:15:40.559Z",
+  "summary": "The diff adds a Motoko backend actor with types/storage for profiles/events/announcements and a new TanStack Router-based frontend with auth gating, admin-only UI wrappers, and UI components for directory/profile/event/announcement workflows. However, several BuildRequest requirements cannot be confirmed from the provided truncated/omitted diffs (notably landing page content, generated image assets, and full backend admin/authorization mechanism), and a couple of unrequested behaviors/branding elements appear to be introduced.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Create a responsive public landing page for \"Gurukul Aulmni Assocation\" with clear calls to action: Sign in (Internet Identity) and Browse.",
+      "reason": "A LandingPage route is wired, but the actual landing page implementation (including CTA buttons and responsive layout) is not present in the provided diff summary.",
+      "evidence": [
+        "frontend/src/App.tsx (routes LandingPage but LandingPage file not shown)"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Directory page loads profiles from backend, supports case-insensitive name search, filters by graduation year and department/major, and opens a profile detail view.",
+      "reason": "Filter UI and profile detail dialog components exist, but the DirectoryPage implementation that actually loads data, applies case-insensitive filtering, and wires click-to-open behavior is not shown.",
+      "evidence": [
+        "frontend/src/App.tsx (DirectoryPage route present, DirectoryPage file not shown)",
+        "frontend/src/components/DirectoryFilters.tsx",
+        "frontend/src/components/AlumniProfileDetailDialog.tsx",
+        "frontend/src/components/AlumniCard.tsx"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Events page lists events sorted by date; admins can create/update/delete; non-admins blocked in UI and backend; persists after refresh.",
+      "reason": "Admin-only UI panels/dialogs exist, but the EventsPage wiring, backend CRUD methods, sorting-by-date behavior, and backend enforcement cannot be confirmed from the truncated/omitted backend and missing EventsPage file.",
+      "evidence": [
+        "frontend/src/App.tsx (EventsPage route present, EventsPage file not shown)",
+        "frontend/src/components/EventAdminPanel.tsx",
+        "frontend/src/components/EventEditorDialog.tsx (uses create/update/delete hooks)",
+        "backend/main.mo (truncated; event storage types shown but CRUD methods not visible)"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Announcements page lists newest-first; admins can create/delete; non-admins blocked in UI and backend; persists after refresh.",
+      "reason": "Admin-only UI panel and composer dialog exist, but the AnnouncementsPage wiring, backend create/delete/list methods, newest-first sorting, and backend enforcement cannot be confirmed from the truncated/omitted backend and missing AnnouncementsPage file.",
+      "evidence": [
+        "frontend/src/App.tsx (AnnouncementsPage route present, AnnouncementsPage file not shown)",
+        "frontend/src/components/AnnouncementAdminPanel.tsx",
+        "frontend/src/components/AnnouncementComposerDialog.tsx (uses create hook)",
+        "backend/main.mo (truncated; announcement storage types shown but CRUD methods not visible)"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Backend admin list managed in-canister with a secure initial-admin mechanism documented in code comments; only admins can mutate events/announcements and manage admin list; unauthorized calls return clear errors/Result and do not change state.",
+      "reason": "The frontend calls an `_initializeAccessControlWithSecret` method and backend includes AccessControl/MixinAuthorization, but the backend admin-list APIs, initial-admin assignment mechanism, and documentation/comments are not visible in the truncated backend excerpt.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts (calls actor._initializeAccessControlWithSecret(adminToken))",
+        "backend/main.mo (truncated; includes authorization modules but admin assignment mechanism not shown)"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "requirement": "Create a coherent distinctive visual theme across pages; avoid blue/purple primary theme.",
+      "reason": "Some styling uses theme tokens like `primary`, but the actual theme definition (colors) and its consistent application across all pages cannot be verified from the provided diff summary. Also, whether the primary color is non-blue/purple is not confirmable from the shown files.",
+      "evidence": [
+        "frontend/src/App.tsx (ThemeProvider present, but no theme config shown)",
+        "frontend/src/components/EventAdminPanel.tsx (uses bg-primary/5 etc.)",
+        "frontend/src/components/RequireAuth.tsx (uses bg-primary/10 etc.)"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Include generated static images under frontend/public/assets/generated and reference them in UI (logo + hero).",
+      "reason": "The header references the logo path, but the diff summary does not show the actual image files being added under `frontend/public/assets/generated`, and the hero/banner image usage is not shown (LandingPage file omitted).",
+      "evidence": [
+        "frontend/src/components/AppHeader.tsx (references /assets/generated/gurukul-logo.dim_512x512.png)",
+        "frontend/src/App.tsx (LandingPage exists but file not shown)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Footer branding/link referencing caffeine.ai (\"Built with ... using caffeine.ai\").",
+      "reason": "BuildRequest does not ask for external product branding or links in the UI.",
+      "evidence": [
+        "frontend/src/components/AppFooter.tsx"
+      ]
+    },
+    {
+      "description": "Admin initialization via a secret URL parameter named `caffeineAdminToken` passed to `_initializeAccessControlWithSecret`.",
+      "reason": "BuildRequest requires a secure initial admin assignment mechanism documented in code comments, but does not request using a URL secret parameter nor this specific token name/flow.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts (getSecretParameter('caffeineAdminToken'); actor._initializeAccessControlWithSecret(adminToken))"
+      ]
+    },
+    {
+      "description": "ThemeProvider set up with system theme switching (`next-themes`).",
+      "reason": "BuildRequest requires a coherent theme (and avoid blue/purple) but does not request system theme toggling/dark-mode infrastructure.",
+      "evidence": [
+        "frontend/src/App.tsx (ThemeProvider attribute=\"class\" defaultTheme=\"system\" enableSystem)"
+      ]
+    }
+  ],
+  "confidence": 0.62,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AdminOnly.tsx",
+    "frontend/src/components/AlumniCard.tsx",
+    "frontend/src/components/AlumniProfileDetailDialog.tsx",
+    "frontend/src/components/AlumniProfileForm.tsx",
+    "frontend/src/components/AnnouncementAdminPanel.tsx",
+    "frontend/src/components/AnnouncementCard.tsx",
+    "frontend/src/components/AnnouncementComposerDialog.tsx",
+    "frontend/src/components/AppFooter.tsx",
+    "frontend/src/components/AppHeader.tsx",
+    "frontend/src/components/AppLayout.tsx",
+    "frontend/src/components/AuthButton.tsx",
+    "frontend/src/components/DirectoryFilters.tsx",
+    "frontend/src/components/EventAdminPanel.tsx",
+    "frontend/src/components/EventCard.tsx",
+    "frontend/src/components/EventEditorDialog.tsx",
+    "frontend/src/components/RequireAuth.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useCurrentUser.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useIsAdmin.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/AnnouncementsPage.tsx",
+    "frontend/src/pages/DirectoryPage.tsx",
+    "frontend/src/pages/EventsPage.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/MyProfilePage.tsx",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

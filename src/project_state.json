@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build an app for an alumni association named \"Gurukul Aulmni Assocation\".",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Alumni association logo mark with academic motif (gurukul-logo.dim_512x512.png)\n- Wide hero/banner illustration with alumni/community/education theme (gurukul-hero.dim_1600x600.png)",
+  "existing_features": [
+    {
+      "id": "feature-create-a-responsive-public-landing-page-for-gurukul-aulmni-assocation-that-introduces-the-association-and-provides-clear-calls-to-action-to-sign-in-and-explore-the-app",
+      "title": "Create a responsive public landing page for \"Gurukul Aulmni Assocation\" that introduces the association and provides clear calls to action to sign in and explore the app.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-internet-identity-sign-in-and-sign-out-ui-and-show-the-signed-in-user-s-principal-or-a-short-form-in-the-app-header-navigation",
+      "title": "Add Internet Identity sign-in and sign-out UI, and show the signed-in user’s principal (or a short form) in the app header/navigation.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-alumni-profile-management-allow-a-signed-in-user-to-create-update-their-own-alumni-profile-with-fields-full-name-graduation-year-department-major-current-city-country-bio-and-optional-contact-email-or-social-link",
+      "title": "Implement alumni profile management: allow a signed-in user to create/update their own alumni profile with fields: full name, graduation year, department/major, current city/country, bio, and optional contact (email or social link).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-searchable-alumni-directory-page-that-lists-member-profiles-name-graduation-year-department-major-location-with-filters-for-graduation-year-and-department-major",
+      "title": "Implement a searchable alumni directory page that lists member profiles (name, graduation year, department/major, location) with filters for graduation year and department/major.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-events-feature-a-page-to-view-upcoming-past-events-title-date-time-location-description-and-an-admin-only-interface-to-create-update-delete-events",
+      "title": "Add Events feature: a page to view upcoming/past events (title, date/time, location, description) and an admin-only interface to create/update/delete events.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-announcements-feature-a-page-to-view-announcements-title-date-content-and-an-admin-only-interface-to-create-delete-announcements",
+      "title": "Add Announcements feature: a page to view announcements (title, date, content) and an admin-only interface to create/delete announcements.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-coherent-distinctive-visual-theme-for-the-app-and-apply-it-consistently-across-pages-typography-color-palette-spacing-and-components-avoid-a-blue-purple-primary-theme",
+      "title": "Create a coherent, distinctive visual theme for the app and apply it consistently across pages (typography, color palette, spacing, and components). Avoid a blue/purple primary theme.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-and-include-required-static-images-for-branding-store-them-in-frontend-public-assets-generated-and-reference-them-in-the-ui-e-g-header-landing",
+      "title": "Generate and include required static images for branding, store them in frontend/public/assets/generated, and reference them in the UI (e.g., header/landing).",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Create an alumni association app for \"Gurukul Aulmni Assocation\".",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Implement backend authorization and administration: create a simple admin list managed in-canister, with a secure method for initial admin assignment and admin management actions restricted to admins only.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Gurukul Aulmni Assocation",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
